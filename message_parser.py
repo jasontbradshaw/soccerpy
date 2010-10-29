@@ -57,4 +57,4 @@ def stringify(itemlist):
 if __name__ == "__main__":
     with open("client_recv", 'r') as f:
         for line in f:
-            parse_message(line.strip())
+            parse(line.strip())
