@@ -1,5 +1,5 @@
 
-def parse_message(text):
+def parse(text):
     """
     Here is what amounts to a simple lisp parser for parsing the server's
     returned messages into an intermediate format that's easier to deal
