@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 def parse(text):
     """
@@ -5,6 +6,10 @@ def parse(text):
     returned messages into an intermediate format that's easier to deal
     with than the raw (often poorly formatted) text.
     """
+    
+    # make sure all of our parenthesis match
+    if text.count("(") != text.count(")"):
+        raise ValueError("Text has some unmatching parenthesis!")
     
     # result acts as a stack that holds the strings grouped by nested parens
     result = []
