@@ -64,17 +64,20 @@ def parse(text):
 if __name__ == "__main__":
     import sys
     
-    if len(sys.argv) > 1:
+    # interactive mode if any args were specified
+    if len(sys.argv) > 2:
            from pprint import pprint
-           with open("client_recv", 'r') as f:
+           with open(sys.argv[1], 'r') as f:
                for line in f:
-                   print line.strip()
+                   print "raw message:\n", line.strip()
                    print
+                   print "parsed message:"
                    pprint(parse(line.strip()))
                    print "----"
                    raw_input()
                    print
     else:
-        with open("client_recv", 'r') as f:
+        # just parse the message file
+        with open(sys.argv[1], 'r') as f:
             for line in f:
                 parse(line.strip())
