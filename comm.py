@@ -39,5 +39,4 @@ class Communicator:
         if conform_address:
             self.address = address
         
-        print data
         return data
