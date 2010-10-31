@@ -1,17 +1,14 @@
 import socket
 
-from pprint import pprint
-from message_parser import parse
-
 class Communicator:
     """
-    Handles the barest level of communication with a server.
+    Handles the barest level of UDP communication with the soccer server.
     """
     
-    def __init__(self, host, port, bufsize=8192):
+    def __init__(self, host, port, bufsize=4096):
         """
         host: hostname of soccer server we want to connect to
-        port: initial port of soccer server
+        port: port of soccer server
         """
         
         self.address = (host, port)
@@ -22,7 +19,7 @@ class Communicator:
     
     def send(self, msg):
         """
-        Sends a message to the socket on the assigned host and port.
+        Sends a message to the soccer server.
         """
         
         self.sock.sendto(msg, self.address)
