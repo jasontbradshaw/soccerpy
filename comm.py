@@ -1,6 +1,6 @@
 import socket
 
-class Communicator:
+class Socket:
     """
     Handles the barest level of UDP communication with the soccer server.
     """
@@ -37,3 +37,4 @@ class Communicator:
             self.address = address
         
         return data
+
