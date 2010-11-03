@@ -1,6 +1,5 @@
 import threading
 
-import message_parser
 import comm
 import worldmodel
 import sp_exceptions

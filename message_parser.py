@@ -17,7 +17,10 @@ def parse(text):
     if text.count("(") != text.count(")"):
         raise ValueError("Text has unmatching parenthesis!")
     
-    # result acts as a stack that holds the strings grouped by nested parens
+    # result acts as a stack that holds the strings grouped by nested parens.
+    # result will only ever contain one item, the first level of indenting
+    # encountered.  this is because the server (hopefully!) only ever sends one
+    # message at a time.
     result = []
     
     # the current level of indentation, used to append chars to correct level
@@ -42,7 +45,7 @@ def parse(text):
         
         # we only indent/dedent if not in the middle of parsing a string
         elif c == "(" and not in_string:
-            # find current level of nesting
+            # recurse into current level of nesting
             cur = result
             for i in xrange(indent):
                 cur = cur[-1]
@@ -56,7 +59,7 @@ def parse(text):
             # append a new level of nesting to our list
             cur.append([])
             
-            # increase the indent level so we can get back to this level
+            # increase the indent level so we can get back to this level later
             indent += 1
         
         elif c == ")" and not in_string:
@@ -92,7 +95,11 @@ def parse(text):
         # save the previous character. used to determine if c is escaped
         prev_c = c
     
-    return result
+    # this returns the first and only message found.  result is a list simply
+    # because it makes adding new levels of indentation simpler as it removes
+    # the 'if result is None' corner case that would come up when trying to
+    # append the first '('.
+    return result[0]
 
 if __name__ == "__main__":
     import sys
@@ -113,4 +120,5 @@ if __name__ == "__main__":
         # just parse the message file
         with open(sys.argv[1], 'r') as f:
             for line in f:
-                parse(line.strip())
+                if len(parse(line.strip())) > 1:
+                    print "found multi-part message"

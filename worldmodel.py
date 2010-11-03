@@ -23,21 +23,20 @@ class WorldModel:
         # get all the expressions contained in the given message
         parsed = message_parser.parse(msg)
         
-        for msg in parsed:
-            
-            # this is the name of the function that should be used to handle
-            # this message type.  we pull it from this object dynamically to
-            # avoid having a huge if/elif/.../else statement.
-            msg_func = "_handle_%s" % msg[0]
+        # this is the name of the function that should be used to handle
+        # this message type.  we pull it from this object dynamically to
+        # avoid having a huge if/elif/.../else statement. this should be both
+        # faster and more flexible (dict lookup is really fast in python).
+        msg_func = "_handle_%s" % parsed[0]
 
-            if hasattr(self, msg_func):
-                # call the appropriate function with this message
-                getattr(self, msg_func).__call__(msg)
+        if hasattr(self, msg_func):
+            # call the appropriate function with this message
+            getattr(self, msg_func).__call__(parsed)
 
-            # throw an exception if we don't know about the given message type
-            else:
-                m = "Can't handle message type '%s', function '%s' not found."
-                raise sp_exceptions.MessageTypeError(m % (msg[0], msg_func))
+        # throw an exception if we don't know about the given message type
+        else:
+            m = "Can't handle message type '%s', function '%s' not found."
+            raise sp_exceptions.MessageTypeError(m % (parsed[0], msg_func))
 
     def _handle_see(self, msg):
         """
