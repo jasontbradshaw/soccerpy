@@ -12,7 +12,7 @@ class WorldModel:
     """
 
     def __init__(self):
-        self.play_mode = None
+        pass
 
     def handle_message(self, msg):
         """
@@ -99,5 +99,14 @@ class WorldModel:
         Deals with error messages by raising them as exceptions.
         """
 
-        raise ServerError("Server returned an error: '%s'" % msg[1])
+        m = "Server returned an error: '%s'" % msg[1:]
+        print sp_exceptions.SoccerServerError(m)
+
+    def _handle_warning(self, msg):
+        """
+        Deals with warnings issued by the server.
+        """
+        
+        m = "Server issued a warning: '%s'" % msg[1:]
+        print sp_exceptions.SoccerServerWarning(m)
 
