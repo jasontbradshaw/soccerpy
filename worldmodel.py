@@ -44,6 +44,7 @@ class WorldModel:
         """
 
         print "see:", msg[1:]
+        print
 
     def _handle_hear(self, msg):
         """
@@ -51,6 +52,7 @@ class WorldModel:
         """
 
         print "hear:", msg[1:]
+        print
 
     def _handle_sense_body(self, msg):
         """
@@ -58,6 +60,7 @@ class WorldModel:
         """
 
         print "sense_body:", msg[1:]
+        print
 
     def _handle_player_param(self, msg):
         """
@@ -65,6 +68,7 @@ class WorldModel:
         """
 
         print "player_param:", msg[1:]
+        print
 
     def _handle_player_type(self, msg):
         """
@@ -72,6 +76,7 @@ class WorldModel:
         """
 
         print "player_type:", msg[1:]
+        print
 
     def _handle_server_param(self, msg):
         """
@@ -79,6 +84,7 @@ class WorldModel:
         """
 
         print "server_param:", msg[1:]
+        print
 
     def _handle_init(self, msg):
         """
@@ -86,6 +92,7 @@ class WorldModel:
         """
 
         print "init:", msg[1:]
+        print
     
     def _handle_error(self, msg):
         """
