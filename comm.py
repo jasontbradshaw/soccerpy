@@ -2,13 +2,14 @@ import socket
 
 class Socket:
     """
-    Handles the barest level of UDP communication with the soccer server.
+    Handles the barest level of UDP communication with a server in a slightly
+    simpler way (for our purposes) than the default socket library.
     """
     
     def __init__(self, host, port, bufsize=4096):
         """
-        host: hostname of soccer server we want to connect to
-        port: port of soccer server
+        host: hostname of the server we want to connect to
+        port: port of the server we want to connect to
         """
         
         self.address = (host, port)
@@ -19,7 +20,7 @@ class Socket:
     
     def send(self, msg):
         """
-        Sends a message to the soccer server.
+        Sends a message to the server.
         """
         
         self.sock.sendto(msg, self.address)
