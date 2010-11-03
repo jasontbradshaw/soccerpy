@@ -6,7 +6,7 @@ class Socket:
     simpler way (for our purposes) than the default socket library.
     """
     
-    def __init__(self, host, port, bufsize=4096):
+    def __init__(self, host, port, bufsize=8192):
         """
         host: hostname of the server we want to connect to
         port: port of the server we want to connect to
