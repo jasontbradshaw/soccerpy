@@ -18,11 +18,15 @@ class Socket:
         # the socket communication with the server takes place on (ipv4, udp)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
-    def send(self, msg):
+    def send(self, msg, append_null_terminator=True):
         """
-        Sends a message to the server.
+        Sends a message to the server.  Appends a null terminator by default.
         """
-        
+
+        # append a null terminator if requested
+        if append_null_terminator:
+            msg = msg + "\0"
+
         self.sock.sendto(msg, self.address)
     
     def recv(self, conform_address=True):
