@@ -180,15 +180,24 @@ class Agent:
         self.sock.send(msg)
 
 if __name__ == "__main__":
-    import time
-    a = Agent("localhost", 6000, "team_agenttest")
-    a.play()
+    import sys
+
+    # arg1: team name
+    # arg2: number of players to start
+    
+    agentlist = []
+    for agent in xrange(int(sys.argv[2])):
+        a = Agent("localhost", 6000, sys.argv[1])
+        a.play()
+
+        agentlist.append(a)
 
     try:
         while 1:
             time.sleep(0.05)
     except KeyboardInterrupt:
-        print "Disconnecting agent..."
-        a.disconnect()
-        print "Agent disconnected."
+        print "Disconnecting agents..."
+        for agent in agentlist:
+            agent.disconnect()
+        print "Agents disconnected."
 
