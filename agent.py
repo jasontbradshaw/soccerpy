@@ -1,7 +1,7 @@
 import threading
 import time
 
-import comm
+import sock
 import worldmodel
 import sp_exceptions
 
@@ -14,7 +14,7 @@ class Agent:
         """
 
         # the pipe through which all of our communication takes place
-        self.sock = comm.Socket(host, port)
+        self.sock = sock.Socket(host, port)
 
         # our model of the world
         self.world = worldmodel.WorldModel()
