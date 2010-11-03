@@ -37,4 +37,3 @@ class Socket:
             self.address = address
         
         return data
-
