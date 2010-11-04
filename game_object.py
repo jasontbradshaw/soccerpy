@@ -24,7 +24,7 @@ class FieldObject(GameObject):
 
         self.position = position
 
-        super.__init__(self, distance, direction)
+        GameObject.__init__(self, distance, direction)
 
 class Line(GameObject):
     """
@@ -34,7 +34,7 @@ class Line(GameObject):
     def __init__(self, distance, direction, line_id):
         self.line_id = line_id
         
-        super.__init__(self, distance, direction)
+        GameObject.__init__(self, distance, direction)
 
 class MobileObject(FieldObject):
     """
@@ -51,7 +51,7 @@ class MobileObject(FieldObject):
         self.dir_change = dir_change
         self.speed = speed
 
-        super.__init__(self, distance, direction, position)
+        FieldObject.__init__(self, distance, direction, position)
 
 class StationaryObject(FieldObject):
     """
@@ -60,7 +60,7 @@ class StationaryObject(FieldObject):
 
     def __init__(self, distance, direction, position):
 
-        super.__init__(self, distance, direction, position)
+        FieldObject.__init__(self, distance, direction, position)
 
 class Ball(MobileObject):
     """
@@ -70,7 +70,7 @@ class Ball(MobileObject):
     def __init__(self, distance, direction, position, dist_change, dir_change,
             speed):
         
-        super.__init__(self, distance, direction, position, dist_change,
+        MobileObject.__init__(self, distance, direction, position, dist_change,
                 dir_change, speed)
 
 class Player(MobileObject):
@@ -92,7 +92,7 @@ class Player(MobileObject):
         self.face_direction = face_direction
         self.neck_direction = neck_direction
 
-        super.__init__(self, distance, direction, position, dist_change,
+        MobileObject.__init__(self, distance, direction, position, dist_change,
                 dir_change, speed)
 
 class Marker(StationaryObject):
@@ -107,5 +107,5 @@ class Marker(StationaryObject):
 
         self.marker_id = marker_id
 
-        super.__init__(self, distance, direction, position)
+        StationaryObject.__init__(self, distance, direction, position)
 
