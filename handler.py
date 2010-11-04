@@ -126,3 +126,61 @@ class ActionHandler:
         
         self.sock = server_socket
 
+    def move(self, x, y):
+        """
+        Teleport the player to some location on the field.  Only works before
+        play begins, ie. pre-game, before starting again at half-time, and
+        post-goal.  If an invalid location is specified, player is teleported to
+        a random location on their side of the field.
+        """
+
+        msg = "(move %.10f %.10f)" % (x, y)
+        self.sock.send(msg)
+
+    def turn(self, relative_degrees):
+        """
+        Turns the player's body some number of degrees relative to its current
+        angle.
+        """
+
+        # disallow unreasonable turning
+        assert -180 <= relative_degrees <= 180
+
+        msg = "(turn %.10f)" % relative_degrees
+        self.sock.send(msg)
+
+    def dash(self, power):
+        """
+        Accelerate the player in the direction its body currently faces.
+        """
+
+        msg = "(dash %.10f)" % power
+        self.sock.send(msg)
+
+    def kick(self, power, relative_direction):
+        """
+        Accelerates the ball with the given power in the given direction,
+        relative to the current direction of the player's body.
+        """
+
+        msg = "(kick %.10f %.10f)"
+        self.sock.send(msg)
+
+    def catch(self, relative_direction):
+        """
+        Attempts to catch the ball and put it in the goalie's hand.  The ball
+        remains there until the goalie kicks it away.
+        """
+
+        msg = "(catch %.10f)" % relative_direction
+        self.sock.send(msg)
+
+    def turn_neck(self, relative_direction):
+        """
+        Rotates the player's neck relative to its previous direction.  Neck
+        angle is relative to body angle.
+        """
+
+        msg = "(turn_neck %.10f)" % relative_direction
+        self.sock.send(msg)
+
