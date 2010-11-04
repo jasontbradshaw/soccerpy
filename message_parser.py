@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+import re
+
+# used to convert server value strings into actual python values
+pattern_int = re.compile("^-?\d+$")
+pattern_float = re.compile("^-?\d*[.]\d+$")
+
 def parse(text):
     """
     This is what amounts to a simple lisp parser for turning the server's
@@ -38,10 +44,10 @@ def parse(text):
     prev_c = None
     for c in text:
         # prevent parsing parens when inside a string (also ignores escaped
-        # '"'s as well).
+        # '"'s as well). doesn't add the quotes so we don't have to recognize
+        # that value as a string via a regex.
         if c == '"' and prev_c != "\\":
             in_string = not in_string
-            s.append(c)
         
         # we only indent/dedent if not in the middle of parsing a string
         elif c == "(" and not in_string:
@@ -53,7 +59,17 @@ def parse(text):
             # add our buffered string onto the previous level, then clear it
             # for the next.
             if len(s) > 0:
-                cur.append(''.join(s))
+                val = ''.join(s)
+
+                # try to convert our string into a value and append it to our
+                # list.  failing that, simply append it as an attribute name.
+                if pattern_int.match(val):
+                    cur.append(int(val))
+                elif pattern_float.match(val):
+                    cur.append(float(val))
+                else:
+                    cur.append(val)
+
                 s = []
             
             # append a new level of nesting to our list
@@ -69,8 +85,17 @@ def parse(text):
                 for i in xrange(indent):
                     cur = cur[-1]
                     
-                # append our buffered string to the last level, then clear it
-                cur.append(''.join(s))
+                val = ''.join(s)
+
+                # try to convert our string into a value and append it to our
+                # list.  failing that, simply append it as an attribute name.
+                if pattern_int.match(val):
+                    cur.append(int(val))
+                elif pattern_float.match(val):
+                    cur.append(float(val))
+                else:
+                    cur.append(val)
+
                 s = []
             
             # we finished with one level, so dedent back to the previous one
@@ -88,8 +113,17 @@ def parse(text):
             for i in xrange(indent):
                 cur = cur[-1]
             
-            # append our buffered string to the results
-            cur.append(''.join(s))
+            val = ''.join(s)
+
+            # try to convert our string into a value and append it to our
+            # list.  failing that, simply append it as an attribute name.
+            if pattern_int.match(val):
+                cur.append(int(val))
+            elif pattern_float.match(val):
+                cur.append(float(val))
+            else:
+                cur.append(val)
+
             s = []
         
         # save the previous character. used to determine if c is escaped
@@ -120,5 +154,5 @@ if __name__ == "__main__":
         # just parse the message file
         with open(sys.argv[1], 'r') as f:
             for line in f:
-                if len(parse(line.strip())) > 1:
-                    print "found multi-part message"
+                parse(line.strip())
+
