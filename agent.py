@@ -43,7 +43,7 @@ class Agent:
                                              name="think_loop")
         self.__think_thread.daemon = True
 
-        # send the init message and allow the world model to handle further
+        # send the init message and allow the message handler to handle further
         # responses.
         init_msg = "(init %s (version %d))"
         self.sock.send(init_msg % (teamname, version))
@@ -67,11 +67,16 @@ class Agent:
     def disconnect(self):
         """
         Tell the loop threads to stop and signal the server that we're
-        disconnecting.
+        disconnecting, then join the loop threads and destroy all our inner
+        methods.
 
         Since the message loop thread can conceiveably block indefinitely while
         waiting for the server to respond, we only allow it (and the think loop
         for good measure) a short time to finish before simply giving up.
+
+        Once an agent has been disconnected, it is 'dead' and cannot be used
+        again.  All of its methods get replaced by a method that raises an
+        exception every time it is called.
         """
 
         # tell the message loop to terminate
@@ -82,8 +87,22 @@ class Agent:
         self.sock.send("(bye)")
 
         # tell our threads to join, but only wait breifly for them to do so
-        self.msg_thread.join(1)
-        self.think_thread.join(1)
+        self.__msg_thread.join(1)
+        self.__think_thread.join(1)
+
+        # used as a replacement for all this object's methods
+        def destroyed_method():
+            """
+            Raises an error, no matter the arguments given.
+            """
+            
+            m = ("Agent has been disconnected and no longer supports "
+                    "any method calls.")
+            raise NotImplementedError(m)
+
+        # destroy this agent object's methods to prevent using them ever again
+        for item in Agent.__dict__.keys(): # iterate over all created methods
+            setattr(self, item, lambda *args: bork())
 
     def __message_loop(self):
         """
