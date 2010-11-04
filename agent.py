@@ -87,8 +87,8 @@ class Agent:
         self.sock.send("(bye)")
 
         # tell our threads to join, but only wait breifly for them to do so
-        self.__msg_thread.join(1)
-        self.__think_thread.join(1)
+        self.__msg_thread.join(0.1)
+        self.__think_thread.join(0.1)
 
         # used as a replacement for all this object's methods
         def destroyed_method():
