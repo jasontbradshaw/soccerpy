@@ -75,6 +75,7 @@ class Agent:
             raise sp_exceptions.AgentAlreadyPlayingError(
                 "Agent is already playing.")
 
+        # tell the thread that it should be running, then start it
         self.thinking = True
         self.think_thread.start()
 
