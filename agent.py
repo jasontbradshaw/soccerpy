@@ -1,5 +1,6 @@
 import threading
 import time
+import random
 
 import sock
 import model 
@@ -17,11 +18,12 @@ class Agent:
         # the pipe through which all of our communication takes place
         self.sock = sock.Socket(host, port)
 
-        # our model of the world
+        # our models of the world and our body
         self.world = model.WorldModel()
+        self.body = model.BodyModel()
 
         # handles all messages received from the server
-        self.msg_handler = handler.MessageHandler(self.world)
+        self.msg_handler = handler.MessageHandler(self.world, self.body)
 
         # handles the sending of actions to the server
         self.act_handler = handler.ActionHandler(self.sock)
@@ -59,6 +61,9 @@ class Agent:
         if self.__thinking:
             raise sp_exceptions.AgentAlreadyPlayingError(
                 "Agent is already playing.")
+
+        # run the method that sets up the agent's persistant variables
+        self.setup_environment()
 
         # tell the thread that it should be running, then start it
         self.__thinking = True
@@ -139,13 +144,42 @@ class Agent:
             # eat up all the time trying to send messages, we never recv any.
             time.sleep(0.0001)
 
+    def setup_environment(self):
+        """
+        Called before the think loop starts, this allows the user to store any
+        variables/objects they'll want access to across subsequent calls to the
+        think method.
+        """
+
+        self.moved = False
+
     def think(self):
         """
         Performs a single step of thinking for our agent.  Gets called on every
         iteration of our think loop.
         """
 
-        self.act_handler.move(1000, 1000)
+        if not self.moved:
+            self.act_handler.move(1000, 1000)
+            self.moved = True
+
+        if self.world.ball is not None:
+            # kick in a random direction if the ball is close enough
+            if self.world.ball.distance <= 1:
+                self.act_handler.kick(100, random.randint(0, 181) - 180)
+                return
+            # dash towards the ball if it's within our field of view
+            elif -5 < self.world.ball.direction < 5:
+                self.act_handler.dash(100)
+                return
+            # turn to face the ball
+            else:
+                self.act_handler.turn(self.world.ball.direction)
+                return
+        else:
+            # search for the ball
+            self.act_handler.turn(10 + random.randint(0, 10))
+            return
 
 if __name__ == "__main__":
     import sys
