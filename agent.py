@@ -41,6 +41,22 @@ class Agent:
         init_msg = "(init %s (version %d))"
         self.sock.send(init_msg % (teamname, version))
 
+    def play(self):
+        """
+        Kicks off the thread that does the agent's thinking, allowing it to play
+        during the game.  Throws an exception if called while the agent is
+        already playing.
+        """
+
+        # throw exception if called while thread is already running
+        if self.thinking:
+            raise sp_exceptions.AgentAlreadyPlayingError(
+                "Agent is already playing.")
+
+        # tell the thread that it should be running, then start it
+        self.thinking = True
+        self.think_thread.start()
+
     def disconnect(self):
         """
         Tell the loop threads to stop and signal the server that we're
@@ -61,23 +77,6 @@ class Agent:
         # tell our threads to join, but only wait breifly for them to do so
         self.msg_thread.join(1)
         self.think_thread.join(1)
-
-    def play(self):
-        """
-        Kicks off the thread that does the agent's thinking, allowing it to play
-        during the game.  Every time this is called, it sets up a new thread of
-        control to allow the agent to play asynchronosly.  Throws an exception
-        if called while the agent is already playing.
-        """
-
-        # throw exception if called while thread is already running
-        if self.thinking:
-            raise sp_exceptions.AgentAlreadyPlayingError(
-                "Agent is already playing.")
-
-        # tell the thread that it should be running, then start it
-        self.thinking = True
-        self.think_thread.start()
 
     def __message_loop(self):
         """
@@ -105,7 +104,7 @@ class Agent:
         """
 
         while self.thinking:
-            # performs the actual thinking our agent will do
+            # performs the actions necessary for the agent to play soccer
             self.think()
 
             # this is necessary to allow our socket some time to recv messages,
