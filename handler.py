@@ -1,6 +1,6 @@
 import message_parser
 import sp_exceptions
-import game_objects
+import game_object
 
 class MessageHandler:
     """
@@ -36,7 +36,8 @@ class MessageHandler:
 
         # throw an exception if we don't know about the given message type
         else:
-            m = "Can't handle message type '%s', function '%s' not found." raise sp_exceptions.MessageTypeError(m % (parsed[0], msg_func))
+            m = "Can't handle message type '%s', function '%s' not found."
+            raise sp_exceptions.MessageTypeError(m % (parsed[0], msg_func))
 
     def _handle_see(self, msg):
         """
@@ -109,4 +110,19 @@ class MessageHandler:
         
         m = "Server issued a warning: '%s'" % msg[1]
         print sp_exceptions.SoccerServerWarning(m)
+
+class ActionHandler:
+    """
+    Provides facilities for sending commands to the soccer server.  Contains all
+    possible commands that can be sent, as well as everything needed to send
+    them.
+    """
+
+    def __init__(self, server_socket):
+        """
+        Save the socket that connects us to the soccer server to allow us to
+        send it commands.
+        """
+        
+        self.sock = server_socket
 

@@ -2,9 +2,9 @@ import threading
 import time
 
 import sock
-import models 
+import model 
 import sp_exceptions
-import handlers
+import handler
 
 class Agent:
     def __init__(self, host, port, teamname, version=11):
@@ -18,27 +18,30 @@ class Agent:
         self.sock = sock.Socket(host, port)
 
         # our model of the world
-        self.world = models.WorldModel()
+        self.world = model.WorldModel()
 
         # handles all messages received from the server
-        self.msg_handler = handlers.MessageHandler(self.world)
+        self.msg_handler = handler.MessageHandler(self.world)
+
+        # handles the sending of actions to the server
+        self.act_handler = handler.ActionHandler(self.sock)
 
         # set up our threaded message receiving system 
-        self.parsing = True # tell thread that we're currently running
-        self.msg_thread = threading.Thread(target=self.__message_loop,
+        self.__parsing = True # tell thread that we're currently running
+        self.__msg_thread = threading.Thread(target=self.__message_loop,
                                            name="message_loop")
-        self.msg_thread.daemon = True # dies when parent thread dies
+        self.__msg_thread.daemon = True # dies when parent thread dies
 
         # start processing received messages. this will catch the initial server
         # response and all subsequent communication.
-        self.msg_thread.start()
+        self.__msg_thread.start()
 
         # create our thinking thread.  this will perform the actions necessary
         # to play a game of robo-soccer.
-        self.thinking = False
-        self.think_thread = threading.Thread(target=self.__think_loop,
+        self.__thinking = False
+        self.__think_thread = threading.Thread(target=self.__think_loop,
                                              name="think_loop")
-        self.think_thread.daemon = True
+        self.__think_thread.daemon = True
 
         # send the init message and allow the world model to handle further
         # responses.
@@ -53,13 +56,13 @@ class Agent:
         """
 
         # throw exception if called while thread is already running
-        if self.thinking:
+        if self.__thinking:
             raise sp_exceptions.AgentAlreadyPlayingError(
                 "Agent is already playing.")
 
         # tell the thread that it should be running, then start it
-        self.thinking = True
-        self.think_thread.start()
+        self.__thinking = True
+        self.__think_thread.start()
 
     def disconnect(self):
         """
@@ -72,8 +75,8 @@ class Agent:
         """
 
         # tell the message loop to terminate
-        self.parsing = False
-        self.thinking = False
+        self.__parsing = False
+        self.__thinking = False
 
         # tell the server that we're quitting
         self.sock.send("(bye)")
@@ -91,7 +94,7 @@ class Agent:
         """
 
         # loop until we're told to stop
-        while self.parsing:
+        while self.__parsing:
             # receive message data from the server and pass it along to the
             # world model as-is.  the world model parses it and stores it within
             # itself for perusal at our leisure.
@@ -107,7 +110,7 @@ class Agent:
         play method to start play, and the disconnect method to end it.
         """
 
-        while self.thinking:
+        while self.__thinking:
             # performs the actions necessary for the agent to play soccer
             self.think()
 
