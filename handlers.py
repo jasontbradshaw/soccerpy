@@ -1,18 +1,19 @@
 import message_parser
 import sp_exceptions
+import game_objects
 
-class WorldModel:
+class MessageHandler:
     """
-    Holds and updates the model of the world as known from current and past
-    data.
-    
+    Handles all incoming messages from the server.  Parses their data and puts
+    it into the given WorldModel.
+
     All '_handle_*' functions deal with their appropriate message types
     as received from a server.  This allows adding a message handler to be as
     simple as adding a new '_handle_*' function to this object.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, world_model):
+        self.world_model = world_model
 
     def handle_message(self, msg):
         """
@@ -35,8 +36,7 @@ class WorldModel:
 
         # throw an exception if we don't know about the given message type
         else:
-            m = "Can't handle message type '%s', function '%s' not found."
-            raise sp_exceptions.MessageTypeError(m % (parsed[0], msg_func))
+            m = "Can't handle message type '%s', function '%s' not found." raise sp_exceptions.MessageTypeError(m % (parsed[0], msg_func))
 
     def _handle_see(self, msg):
         """

@@ -2,8 +2,9 @@ import threading
 import time
 
 import sock
-import worldmodel
+import models 
 import sp_exceptions
+import handlers
 
 class Agent:
     def __init__(self, host, port, teamname, version=11):
@@ -17,7 +18,10 @@ class Agent:
         self.sock = sock.Socket(host, port)
 
         # our model of the world
-        self.world = worldmodel.WorldModel()
+        self.world = models.WorldModel()
+
+        # handles all messages received from the server
+        self.msg_handler = handlers.MessageHandler(self.world)
 
         # set up our threaded message receiving system 
         self.parsing = True # tell thread that we're currently running
@@ -92,7 +96,7 @@ class Agent:
             # world model as-is.  the world model parses it and stores it within
             # itself for perusal at our leisure.
             raw_msg = self.sock.recv()
-            self.world.handle_message(raw_msg)
+            self.msg_handler.handle_message(raw_msg)
 
     def __think_loop(self):
         """
