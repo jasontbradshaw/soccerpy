@@ -12,8 +12,9 @@ class MessageHandler:
     simple as adding a new '_handle_*' function to this object.
     """
 
-    def __init__(self, world_model):
+    def __init__(self, world_model, body_model):
         self.world_model = world_model
+        self.body_model = body_model
 
     def handle_message(self, msg):
         """
@@ -46,6 +47,17 @@ class MessageHandler:
 
         print "see:", msg[1:]
         print
+
+        self.world_model.ball = None
+
+        # get the location of the ball object
+        for obj in msg[2:]:
+            if type(obj) is type([]):
+                if obj[0] == ['b']:
+                    if len(obj[1:]) >= 2:
+                        self.world_model.ball = game_object.Ball(obj[1], obj[2],
+                                None, None, None, None)
+                        print self.world_model.ball
 
     def _handle_hear(self, msg):
         """
@@ -163,7 +175,7 @@ class ActionHandler:
         relative to the current direction of the player's body.
         """
 
-        msg = "(kick %.10f %.10f)"
+        msg = "(kick %.10f %.10f)" % (power, relative_direction)
         self.sock.send(msg)
 
     def catch(self, relative_direction):
