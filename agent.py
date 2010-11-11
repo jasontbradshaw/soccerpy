@@ -16,7 +16,7 @@ class Agent:
         """
 
         # the pipe through which all of our communication takes place
-        self.sock = sock.Socket(host, port)
+        self.__sock = sock.Socket(host, port)
 
         # our models of the world and our body
         self.world = model.WorldModel()
@@ -26,7 +26,7 @@ class Agent:
         self.msg_handler = handler.MessageHandler(self.world, self.body)
 
         # handles the sending of actions to the server
-        self.act_handler = handler.ActionHandler(self.sock)
+        self.act_handler = handler.ActionHandler(self.__sock)
 
         # set up our threaded message receiving system 
         self.__parsing = True # tell thread that we're currently running
@@ -48,7 +48,7 @@ class Agent:
         # send the init message and allow the message handler to handle further
         # responses.
         init_msg = "(init %s (version %d))"
-        self.sock.send(init_msg % (teamname, version))
+        self.__sock.send(init_msg % (teamname, version))
 
     def play(self):
         """
@@ -89,7 +89,7 @@ class Agent:
         self.__thinking = False
 
         # tell the server that we're quitting
-        self.sock.send("(bye)")
+        self.__sock.send("(bye)")
 
         # tell our threads to join, but only wait breifly for them to do so
         self.__msg_thread.join(0.1)
@@ -122,7 +122,7 @@ class Agent:
             # receive message data from the server and pass it along to the
             # world model as-is.  the world model parses it and stores it within
             # itself for perusal at our leisure.
-            raw_msg = self.sock.recv()
+            raw_msg = self.__sock.recv()
             self.msg_handler.handle_message(raw_msg)
 
     def __think_loop(self):
