@@ -19,7 +19,7 @@ class MessageHandler:
     def handle_message(self, msg):
         """
         Takes a raw message direct from the server, parses it, and stores its
-        data within this object.
+        data in the world and body model objects given at init.
         """
         
         # get all the expressions contained in the given message
