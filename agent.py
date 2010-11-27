@@ -107,7 +107,7 @@ class Agent:
 
         # destroy this agent object's methods to prevent using them ever again
         for item in Agent.__dict__.keys(): # iterate over all created methods
-            setattr(self, item, lambda *args: bork())
+            setattr(self, item, lambda *args: destroyed_method())
 
     def __message_loop(self):
         """
