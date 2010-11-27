@@ -188,7 +188,7 @@ if __name__ == "__main__":
     # arg2: number of players to start
     
     agentlist = []
-    for agent in xrange(int(sys.argv[2])):
+    for agent in xrange(max(11, int(sys.argv[2]))):
         a = Agent("localhost", 6000, sys.argv[1])
         a.play()
 
