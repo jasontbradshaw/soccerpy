@@ -167,10 +167,12 @@ class Agent:
         iteration of our think loop.
         """
 
+        # move to a random field position on first call
         if not self.moved:
             self.act_handler.move(1000, 1000)
             self.moved = True
 
+        # perform random-play strategy
         if self.world.ball is not None and self.world.ball.direction is not None:
             # kick in a random direction if the ball is close enough
             if self.world.ball.distance <= 1:
@@ -182,7 +184,7 @@ class Agent:
                 return
             # turn to face the ball
             else:
-                self.act_handler.turn(self.world.ball.direction)
+                self.act_handler.turn(self.world.ball.direction / 2)
                 return
         else:
             # search for the ball
