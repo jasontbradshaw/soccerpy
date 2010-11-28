@@ -174,6 +174,9 @@ class Agent:
         play method to start play, and the disconnect method to end it.
         """
 
+        # TODO: prevent the think method from being run too often, as it spams
+        # the server with messages currently and slows things down ALOT.
+
         while self.__thinking:
             # performs the actions necessary for the agent to play soccer
             self.think()
@@ -237,8 +240,6 @@ if __name__ == "__main__":
     agentlist = []
     for agent in xrange(min(11, int(sys.argv[2]))):
         a = Agent()
-        a.connect("localhost", 6000, sys.argv[1])
-        a.disconnect()
         a.connect("localhost", 6000, sys.argv[1])
         a.play()
 
