@@ -195,6 +195,45 @@ class MessageHandler:
 
         print "sense_body:", msg[1:], "\n"
 
+        # update the body model information when received. each piece of info is
+        # a list with the first item as the name of the data, and the rest as
+        # the values.
+        for info in msg[2:]:
+            name = info[0]
+            values = info[1:]
+
+            if name == "view_mode":
+                self.body_model.view_mode = tuple(values)
+            elif name == "stamina":
+                self.body_model.stamina = tuple(values)
+            elif name == "speed":
+                self.body_model.speed = tuple(values)
+            elif name == "head_angle":
+                self.body_model.head_angle = values[0]
+            
+            # these update the counts of the basic actions taken
+            elif name == "kick":
+                self.body_model.kick_count = values[0]
+            elif name == "dash":
+                self.body_model.dash_count = values[0]
+            elif name == "turn":
+                self.body_model.turn_count = values[0]
+            elif name == "say":
+                self.body_model.say_count = values[0]
+            elif name == "turn_neck":
+                self.body_model.turn_neck_count = values[0]
+            elif name == "catch":
+                self.body_model.catch_count = values[0]
+            elif name == "move":
+                self.body_model.move_count = values[0]
+            elif name == "change_view":
+                self.body_model.change_view_count = values[0]
+            
+            # we leave unknown values out of the equation
+            else:
+                pass
+
+
     def _handle_player_param(self, msg):
         """
         Deals with player parameter information.
