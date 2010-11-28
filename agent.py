@@ -5,17 +5,45 @@ import time
 import random
 
 import sock
-import model 
+import model
 import sp_exceptions
 import handler
 
 class Agent:
-    def __init__(self, host, port, teamname, version=11):
+    def __init__(self):
+        # whether we're connected to a server yet or not
+        self.__connected = False
+
+        # set all variables and important objects to appropriate values for
+        # pre-connect state.
+        self.__sock = None
+
+        self.world = None
+        self.body = None
+        self.msg_handler = None
+        self.act_handler = None
+
+        self.__parsing = False
+        self.__msg_thread = None
+
+        self.__thinking = False
+        self.__think_thread = None
+
+    def connect(self, host, port, teamname, version=11):
         """
         Gives us a connection to the server as one player on a team.  This
         immediately connects the agent to the server and starts receiving and
         parsing the information it sends.
         """
+
+        # if already connected, raise an error since user may have wanted to
+        # connect again to a different server.
+        if self.__connected:
+            raise Exception("Cannot connect while already connected, disconnect"
+                    "first.")
+        
+        # set connected state
+        self.__connected = True
 
         # the pipe through which all of our communication takes place
         self.__sock = sock.Socket(host, port)
@@ -30,7 +58,7 @@ class Agent:
         # handles the sending of actions to the server
         self.act_handler = handler.ActionHandler(self.__sock)
 
-        # set up our threaded message receiving system 
+        # set up our threaded message receiving system
         self.__parsing = True # tell thread that we're currently running
         self.__msg_thread = threading.Thread(target=self.__message_loop,
                                            name="message_loop")
@@ -45,7 +73,7 @@ class Agent:
         init_address = self.__sock.address
         init_msg = "(init %s (version %d))"
         self.__sock.send(init_msg % (teamname, version))
-        
+
         # wait until the socket receives a response from the server and gets its
         # assigned port.
         while self.__sock.address == init_address:
@@ -64,6 +92,10 @@ class Agent:
         during the game.  Throws an exception if called while the agent is
         already playing.
         """
+
+        # ensure we're connected before doing anything
+        if not self.__connected:
+            raise Exception("Must be connected to a server to begin play.")
 
         # throw exception if called while thread is already running
         if self.__thinking:
@@ -92,6 +124,10 @@ class Agent:
         exception every time it is called.
         """
 
+        # don't do anything if not connected
+        if not self.__connected:
+            return
+
         # tell the message loop to terminate
         self.__parsing = False
         self.__thinking = False
@@ -99,23 +135,18 @@ class Agent:
         # tell the server that we're quitting
         self.__sock.send("(bye)")
 
-        # tell our threads to join, but only wait breifly for them to do so
-        self.__msg_thread.join(0.1)
-        self.__think_thread.join(0.1)
+        # tell our threads to join, but only wait breifly for them to do so.
+        # don't join them if they haven't been started (this can happen if
+        # disconnect is called very quickly after connect).
+        if self.__msg_thread.is_alive():
+            self.__msg_thread.join(0.1)
 
-        # used as a replacement for all this object's methods
-        def destroyed_method():
-            """
-            Raises an error, no matter the arguments given.
-            """
-            
-            m = ("Agent has been disconnected and no longer supports "
-                    "any method calls.")
-            raise NotImplementedError(m)
+        if self.__think_thread.is_alive():
+            self.__think_thread.join(0.1)
 
-        # destroy this agent object's methods to prevent using them ever again
-        for item in Agent.__dict__.keys(): # iterate over all created methods
-            setattr(self, item, lambda *args: destroyed_method())
+        # reset all standard variables in this object.  self.__connected gets
+        # reset here, along with all other non-user defined internal variables.
+        Agent.__init__(self)
 
     def __message_loop(self):
         """
@@ -196,10 +227,13 @@ if __name__ == "__main__":
 
     # arg1: team name
     # arg2: number of players to start
-    
+
     agentlist = []
     for agent in xrange(min(11, int(sys.argv[2]))):
-        a = Agent("localhost", 6000, sys.argv[1])
+        a = Agent()
+        a.connect("localhost", 6000, sys.argv[1])
+        a.disconnect()
+        a.connect("localhost", 6000, sys.argv[1])
         a.play()
 
         agentlist.append(a)
