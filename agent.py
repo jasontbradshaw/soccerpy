@@ -38,17 +38,23 @@ class Agent:
         # response and all subsequent communication.
         self.__msg_thread.start()
 
+        # send the init message and allow the message handler to handle further
+        # responses.
+        init_address = self.__sock.address
+        init_msg = "(init %s (version %d))"
+        self.__sock.send(init_msg % (teamname, version))
+        
+        # wait until the socket receives a response from the server and gets its
+        # assigned port.
+        while self.__sock.address == init_address:
+            time.sleep(0.0001)
+
         # create our thinking thread.  this will perform the actions necessary
         # to play a game of robo-soccer.
         self.__thinking = False
         self.__think_thread = threading.Thread(target=self.__think_loop,
                                              name="think_loop")
         self.__think_thread.daemon = True
-
-        # send the init message and allow the message handler to handle further
-        # responses.
-        init_msg = "(init %s (version %d))"
-        self.__sock.send(init_msg % (teamname, version))
 
     def play(self):
         """

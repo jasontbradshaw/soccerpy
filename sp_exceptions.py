@@ -20,3 +20,8 @@ class AgentAlreadyPlayingError(Exception):
     playing.
     """
 
+class ObjectTypeError(Exception):
+    """
+    Raised when an unknown object type is encountered in a sense message.
+    """
+

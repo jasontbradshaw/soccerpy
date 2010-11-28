@@ -20,7 +20,7 @@ class Line(GameObject):
     def __init__(self, distance, direction, line_id):
         self.line_id = line_id
         
-        GameObject.__init__(self, distance, direction)]
+        GameObject.__init__(self, distance, direction)
 
 class Goal(GameObject):
     """
@@ -42,7 +42,7 @@ class Flag(GameObject):
         Adds a flag id for this field object.  Every flag has a unique id.
         """
 
-        self.marker_id = marker_id
+        self.flag_id = flag_id
 
         GameObject.__init__(self, distance, direction)
 
@@ -64,7 +64,7 @@ class MobileObject(GameObject):
 
 class Ball(MobileObject):
     """
-    A special instance of a mobile object representing the soccer ball.
+    A spcial instance of a mobile object representing the soccer ball.
     """
 
     def __init__(self, distance, direction, dist_change, dir_change, speed):

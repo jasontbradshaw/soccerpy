@@ -21,7 +21,7 @@ def parse(text):
     
     # make sure all of our parenthesis match
     if text.count("(") != text.count(")"):
-        raise ValueError("Text has unmatching parenthesis!")
+        raise ValueError("Message text has unmatching parenthesis!")
     
     # result acts as a stack that holds the strings grouped by nested parens.
     # result will only ever contain one item, the first level of indenting
@@ -130,7 +130,7 @@ def parse(text):
         prev_c = c
     
     # this returns the first and only message found.  result is a list simply
-    # because it makes adding new levels of indentation simpler as it removes
+    # because it makes adding new levels of indentation simpler as it avoids
     # the 'if result is None' corner case that would come up when trying to
     # append the first '('.
     return result[0]
