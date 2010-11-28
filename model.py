@@ -9,7 +9,12 @@ class WorldModel:
     """
 
     def __init__(self):
+        # these variables store all objects for any particular game step
         self.ball = None
+        self.goals = []
+        self.flags = []
+        self.players = []
+        self.lines = []
 
 class BodyModel:
     """

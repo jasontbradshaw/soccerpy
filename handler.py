@@ -56,8 +56,15 @@ class MessageHandler:
         # the simulation cycle of the soccer server
         sim_time = msg[1]
 
+        # store new values before changing those in the world model.  all new
+        # values replace those in the world model at the end of parsing.
+        new_ball = None
+        new_flags = []
+        new_goals = []
+        new_lines = []
+        new_players = []
+
         # iterate over all the objects given to us in the last see message
-        gos = [] # game objects get stored here
         for obj in msg[2:]:
             name = obj[0]
             members = obj[1:]
@@ -93,9 +100,6 @@ class MessageHandler:
                     body_dir = members[4]
                     head_dir = members[5]
 
-            # determine the type of object we're looking at and parse it
-            new_go = None
-
             # parse flags
             if name[0] == 'f':
                 # since the flag's name sometimes contains a number, the parser
@@ -107,7 +111,7 @@ class MessageHandler:
                 # the flag's id is its name's members following the f as a string
                 flag_id = ''.join(name[1:])
 
-                new_go = game_object.Flag(distance, direction, flag_id)
+                new_flags.append(game_object.Flag(distance, direction, flag_id))
 
             # parse players
             elif name[0] == 'p':
@@ -125,9 +129,9 @@ class MessageHandler:
                 
                 # TODO: figure out what a 'p' message looks like, exactly
                 # (speed? body/neck dirs?).
-                new_go = game_object.Player(distance, direction, dist_change,
-                        dir_change, None, position, teamname, uniform_number,
-                        None, None)
+                new_players.append(game_object.Player(distance, direction,
+                    dist_change, dir_change, None, position, teamname,
+                    uniform_number, None, None))
 
             # parse goals
             elif name[0] == 'g':
@@ -136,7 +140,7 @@ class MessageHandler:
                 if len(name) > 1:
                     goal_id = name[1]
 
-                new_go = game_object.Goal(distance, direction, goal_id)
+                new_goals.append(game_object.Goal(distance, direction, goal_id))
 
             # parse lines
             elif name[0] == 'l':
@@ -144,42 +148,43 @@ class MessageHandler:
                 if len(name) > 1:
                     line_id = name[1]
 
-                new_go = game_object.Line(distance, direction, line_id)
+                new_lines.append(game_object.Line(distance, direction, line_id))
 
             # parse the ball
             elif name[0] == 'b':
                 # TODO: handle speed!
-                new_go = game_object.Ball(distance, direction, dist_change,
+                new_ball = game_object.Ball(distance, direction, dist_change,
                         dir_change, None)
-
-                # TODO: remove this, it's for testing only!
-                self.world_model.ball = new_go
 
             # object very near to but not viewable by the player are 'blank'
 
             # the out-of-view ball
             elif name[0] == 'B':
-                new_go = game_object.Ball(None, None, None, None, None)
+                new_ball = game_object.Ball(None, None, None, None, None)
 
             # an out-of-view flag
             elif name[0] == 'F':
-                new_go = game_object.Flag(None, None, None)
+                new_flags.append(game_object.Flag(None, None, None))
 
             # an out-of-view goal
             elif name[0] == 'G':
-                new_go = game_object.Goal(None, None, None)
+                new_goals.append(game_object.Goal(None, None, None))
 
             # an out-of-view player
             elif name[0] == 'P':
-                new_go = game_object.Player(None, None, None, None, None, None,
-                        None, None, None, None, None)
+                new_players.append(game_object.Player(None, None, None, None,
+                    None, None, None, None, None, None, None))
 
             # an unhandled object type
             else:
                 raise ObjectTypeError("Unknown object: '" + str(obj) + "'")
 
-            # add the newly parsed game object to the list
-            gos.append(new_go)
+        # change the data in the world model to the newly parsed data
+        self.world_model.ball = new_ball
+        self.world_model.flags = new_flags
+        self.world_model.goals = new_goals
+        self.world_model.players = new_players
+        self.world_model.lines = new_lines
 
     def _handle_hear(self, msg):
         """
