@@ -12,20 +12,6 @@ class GameObject:
         self.distance = distance
         self.direction = direction
 
-class FieldObject(GameObject):
-    """
-    Represents some object on the field, stationary or mobile.
-    """
-
-    def __init__(self, distance, direction, position):
-        """
-        Field objects have a position in addition to GameObject's members.
-        """
-
-        self.position = position
-
-        GameObject.__init__(self, distance, direction)
-
 class Line(GameObject):
     """
     Represents a line on the soccer field.
@@ -34,43 +20,56 @@ class Line(GameObject):
     def __init__(self, distance, direction, line_id):
         self.line_id = line_id
         
+        GameObject.__init__(self, distance, direction)]
+
+class Goal(GameObject):
+    """
+    Represents a goal object on the field.
+    """
+
+    def __init__(self, distance, direction, goal_id):
+        self.goal_id = goal_id
+
         GameObject.__init__(self, distance, direction)
 
-class MobileObject(FieldObject):
+class Flag(GameObject):
+    """
+    A flag on the field.  Can be used by the agent to determine its position.
+    """
+
+    def __init__(self, distance, direction, flag_id):
+        """
+        Adds a flag id for this field object.  Every flag has a unique id.
+        """
+
+        self.marker_id = marker_id
+
+        GameObject.__init__(self, distance, direction)
+
+class MobileObject(GameObject):
     """
     Represents objects that can move.
     """
 
-    def __init__(self, distance, direction, position, dist_change, dir_change,
-            speed):
+    def __init__(self, distance, direction, dist_change, dir_change, speed):
         """
-        Adds variables for velocity vector deltas.
+        Adds variables for distance and direction deltas.
         """
 
         self.dist_change = dist_change
         self.dir_change = dir_change
         self.speed = speed
 
-        FieldObject.__init__(self, distance, direction, position)
-
-class StationaryObject(FieldObject):
-    """
-    Represents a field object that has a fixed position throughout the game.
-    """
-
-    def __init__(self, distance, direction, position):
-
-        FieldObject.__init__(self, distance, direction, position)
+        GameObject.__init__(self, distance, direction)
 
 class Ball(MobileObject):
     """
     A special instance of a mobile object representing the soccer ball.
     """
 
-    def __init__(self, distance, direction, position, dist_change, dir_change,
-            speed):
+    def __init__(self, distance, direction, dist_change, dir_change, speed):
         
-        MobileObject.__init__(self, distance, direction, position, dist_change,
+        MobileObject.__init__(self, distance, direction, dist_change,
                 dir_change, speed)
 
 class Player(MobileObject):
@@ -78,8 +77,8 @@ class Player(MobileObject):
     Represents a friendly or enemy player in the game.
     """
 
-    def __init__(self, distance, direction, position, dist_change, dir_change,
-            speed, team, side, uniform_number, body_direction, face_direction,
+    def __init__(self, distance, direction, dist_change, dir_change, speed,
+            position, team, side, uniform_number, body_direction,
             neck_direction):
         """
         Adds player-specific information to a mobile object.
@@ -87,25 +86,11 @@ class Player(MobileObject):
 
         self.team = team
         self.side = side
+        self.position = position
         self.uniform_number = uniform_number
         self.body_direction = body_direction
-        self.face_direction = face_direction
         self.neck_direction = neck_direction
 
-        MobileObject.__init__(self, distance, direction, position, dist_change,
+        MobileObject.__init__(self, distance, direction, dist_change,
                 dir_change, speed)
-
-class Marker(StationaryObject):
-    """
-    A marker on the field.  Used to indicate relative position to the player.
-    """
-
-    def __init__(self, distance, direction, position, marker_id):
-        """
-        Adds a marker id for this field object.  Every marker has a unique id.
-        """
-
-        self.marker_id = marker_id
-
-        StationaryObject.__init__(self, distance, direction, position)
 
