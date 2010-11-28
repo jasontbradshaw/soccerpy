@@ -25,3 +25,9 @@ class ObjectTypeError(Exception):
     Raised when an unknown object type is encountered in a sense message.
     """
 
+class AgentConnectionStateError(Exception):
+    """
+    Raised when methods are called at an inappropriate time relative to the
+    connection state of the agent object.
+    """
+

@@ -39,8 +39,8 @@ class Agent:
         # if already connected, raise an error since user may have wanted to
         # connect again to a different server.
         if self.__connected:
-            raise Exception("Cannot connect while already connected, disconnect"
-                    "first.")
+            msg = "Cannot connect while already connected, disconnect first."
+            raise sp_exceptions.AgentConnectionStateError(msg)
         
         # set connected state
         self.__connected = True
@@ -95,7 +95,8 @@ class Agent:
 
         # ensure we're connected before doing anything
         if not self.__connected:
-            raise Exception("Must be connected to a server to begin play.")
+            msg = "Must be connected to a server to begin play."
+            raise sp_exceptions.AgentConnectionStateError(msg)
 
         # throw exception if called while thread is already running
         if self.__thinking:
