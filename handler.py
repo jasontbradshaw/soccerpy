@@ -1,3 +1,5 @@
+import collections
+
 import message_parser
 import sp_exceptions
 import game_object
@@ -15,6 +17,9 @@ class MessageHandler:
     def __init__(self, world_model, body_model):
         self.world_model = world_model
         self.body_model = body_model
+
+        # an inner class used for creating named tuple 'hear' messages
+        self.Message = collections.namedtuple("Message", "time sender message")
 
     def handle_message(self, msg):
         """
@@ -126,11 +131,11 @@ class MessageHandler:
                     uniform_number = name[2]
                 if len(name) >= 4:
                     position = name[3]
-                
+
                 # TODO: figure out what a 'p' message looks like, exactly
-                # (speed? body/neck dirs?).
+                # (speed? body/neck dirs? uniform number?).
                 new_players.append(game_object.Player(distance, direction,
-                    dist_change, dir_change, None, position, teamname,
+                    dist_change, dir_change, None, position, teamname, None,
                     uniform_number, None, None))
 
             # parse goals
@@ -193,6 +198,34 @@ class MessageHandler:
 
         print "hear:", msg[1:], "\n"
 
+        time_recvd = msg[1] # server cycle when message was heard
+        sender = msg[2] # name (or direction) of who sent the message
+        message = msg[3] # message string
+
+        # ignore messages sent by self
+        if sender == "self":
+            return
+
+        # handle messages from the referee, typically to update game state
+        elif sender == "referee":
+            # TODO: handle ref messages
+            pass
+
+        # all other messages are treated equally
+        else:
+            # messages are named 3-tuples of (time, sender, message)
+            new_msg = self.Message(time_recvd, sender, message)
+
+            # create a new queue so we can replace the old queue atomically
+            new_queue = [new_msg]
+            new_queue.extend(self.world_model.msg_queue)
+
+            # remove oldest message if necessary
+            if len(new_queue) > self.world_model.max_msg_queue_length:
+                new_queue = new_queue[:-1]
+
+            self.world_model.msg_queue = new_queue
+
     def _handle_sense_body(self, msg):
         """
         Deals with the agent's body model information.
@@ -215,7 +248,7 @@ class MessageHandler:
                 self.body_model.speed = tuple(values)
             elif name == "head_angle":
                 self.body_model.head_angle = values[0]
-            
+
             # these update the counts of the basic actions taken
             elif name == "kick":
                 self.body_model.kick_count = values[0]
@@ -233,7 +266,7 @@ class MessageHandler:
                 self.body_model.move_count = values[0]
             elif name == "change_view":
                 self.body_model.change_view_count = values[0]
-            
+
             # we leave unknown values out of the equation
             else:
                 pass
@@ -354,6 +387,17 @@ class ActionHandler:
 
         msg = "(catch %.10f)" % relative_direction
         print "send: ", msg, "\n"
+
+        self.sock.send(msg)
+
+    def say(self, message):
+        """
+        Says something to other players on the field.  Messages are restricted
+        in length, but that isn't enforced here.
+        """
+
+        msg = "(say %s)" % message
+        print "send:", msg, "\n"
 
         self.sock.send(msg)
 

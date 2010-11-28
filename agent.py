@@ -199,6 +199,10 @@ class Agent:
         iteration of our think loop.
         """
 
+        # DEBUG
+        if not self.__think_thread.is_alive() or not self.__msg_thread.is_alive():
+            raise Exception("A thread died.")
+
         # move to a random field position on first call
         if not self.moved:
             self.act_handler.move(1000, 1000)
@@ -208,6 +212,7 @@ class Agent:
         if self.world.ball is not None and self.world.ball.direction is not None:
             # kick in a random direction if the ball is close enough
             if self.world.ball.distance <= 1:
+                self.act_handler.say("K")
                 self.act_handler.kick(100, 180 - random.randint(0, 361))
                 return
             # dash towards the ball if it's within our field of view
