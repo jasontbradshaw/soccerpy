@@ -208,7 +208,7 @@ class Agent:
         if self.world.ball is not None and self.world.ball.direction is not None:
             # kick in a random direction if the ball is close enough
             if self.world.ball.distance <= 1:
-                self.act_handler.kick(100, 180 - random.randint(0, 181))
+                self.act_handler.kick(100, 180 - random.randint(0, 361))
                 return
             # dash towards the ball if it's within our field of view
             elif -5 < self.world.ball.direction < 5:
