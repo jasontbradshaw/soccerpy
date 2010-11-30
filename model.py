@@ -16,13 +16,12 @@ class WorldModel:
         self.players = []
         self.lines = []
 
-        # used to store some number of recent messages heard by the agent.  the
-        # queue's first item is the newest, and the last is the oldest.
-        # messages are named tuples, where 'time' is time received, 'sender' is
-        # direction or name of sender, and 'message' is the contents of the
-        # received message.
-        self.max_msg_queue_length = 25
-        self.msg_queue = []
+        # handle player information, like uniform number and side
+        self.side = None
+        self.uniform_number = None
+
+        # stores the most recent message heard
+        self.last_message = None
 
 class BodyModel:
     """

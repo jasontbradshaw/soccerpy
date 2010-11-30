@@ -202,11 +202,11 @@ class MessageHandler:
         sender = msg[2] # name (or direction) of who sent the message
         message = msg[3] # message string
 
-        # ignore messages sent by self
+        # ignore messages sent by self (NOTE: would anybody really want these?)
         if sender == "self":
             return
 
-        # handle messages from the referee, typically to update game state
+        # handle messages from the referee, to update game state
         elif sender == "referee":
             # TODO: handle ref messages
             pass
@@ -216,15 +216,8 @@ class MessageHandler:
             # messages are named 3-tuples of (time, sender, message)
             new_msg = self.Message(time_recvd, sender, message)
 
-            # create a new queue so we can replace the old queue atomically
-            new_queue = [new_msg]
-            new_queue.extend(self.world_model.msg_queue)
-
-            # remove oldest message if necessary
-            if len(new_queue) > self.world_model.max_msg_queue_length:
-                new_queue = new_queue[:-1]
-
-            self.world_model.msg_queue = new_queue
+            # update the model's last heard message
+            self.world_model.prev_message = new_msg
 
     def _handle_sense_body(self, msg):
         """
