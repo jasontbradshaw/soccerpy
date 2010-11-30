@@ -10,9 +10,7 @@ class WorldModel:
 
     class PlayModes:
         """
-        Contains all valid play modes in the soccer game.  Used to match and set
-        them in the WorldModel.  Can't be instantiated, and acts as a static
-        class.
+        Acts as a static class containing variables for all valid play modes.
         """
 
         BEFORE_KICK_OFF = "before_kick_off"
@@ -28,14 +26,37 @@ class WorldModel:
         CORNER_KICK_R = "corner_kick_r"
         GOAL_KICK_L = "goal_kick_l"
         GOAL_KICK_R = "goal_kick_r"
-        GOAL_L = "goal_l"
-        GOAL_R = "goal_r"
         DROP_BALL = "drop_ball"
         OFFSIDE_L = "offside_l"
         OFFSIDE_R = "offside_r"
 
         def __init__(self):
             raise NotImplementedError("Don't instantiate a PlayModes class,"
+                    " access it statically through WorldModel instead.")
+
+    class RefereeMessages:
+        """
+        Contains possible non-mode messages sent by a referee.
+        """
+
+        # these are referee messages, not play modes
+        FOUL_L = "foul_l"
+        FOUL_R = "foul_r"
+        GOALIE_CATCH_BALL_L = "goalie_catch_ball_l"
+        GOALIE_CATCH_BALL_R = "goalie_catch_ball_r"
+        TIME_UP_WITHOUT_A_TEAM = "time_up_without_a_team"
+        TIME_UP = "time_up"
+        HALF_TIME = "half_time"
+        TIME_EXTENDED = "time_extended"
+
+        # these are special, as they are always followed by '_' and an int of
+        # the number of goals scored by that side so far.  these won't match
+        # anything specifically, but goals WILL start with these.
+        GOAL_L = "goal_l_"
+        GOAL_R = "goal_r_"
+
+        def __init__(self):
+            raise NotImplementedError("Don't instantiate a RefereeMessages class,"
                     " access it statically through WorldModel instead.")
 
     def __init__(self):
@@ -45,6 +66,10 @@ class WorldModel:
         self.flags = []
         self.players = []
         self.lines = []
+
+        # scores for each side
+        self.score_l = 0
+        self.score_r = 0
 
         # handle player information, like uniform number and side
         self.side = None
