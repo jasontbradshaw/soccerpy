@@ -11,6 +11,7 @@ class WorldModel:
     class PlayModes:
         """
         Acts as a static class containing variables for all valid play modes.
+        The string values correspond to what the referee calls the game modes.
         """
 
         BEFORE_KICK_OFF = "before_kick_off"

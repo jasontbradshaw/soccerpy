@@ -150,6 +150,7 @@ class MessageHandler:
 
             # parse lines
             elif name[0] == 'l':
+                # see if we know which line this is
                 line_id = None
                 if len(name) > 1:
                     line_id = name[1]
@@ -327,6 +328,16 @@ class MessageHandler:
         """
 
         print "init:", msg[1:], "\n"
+
+        # set the player's uniform number, side, and the play mode as returned
+        # by the server directly after connecting.
+        side = msg[1]
+        uniform_number = msg[2]
+        play_mode = msg[3]
+
+        self.world_model.side = side
+        self.world_model.uniform_number = uniform_number
+        self.world_model.play_mode = play_mode
 
     def _handle_error(self, msg):
         """
