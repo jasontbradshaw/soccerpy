@@ -3,6 +3,7 @@ import collections
 import message_parser
 import sp_exceptions
 import game_object
+import model
 
 class MessageHandler:
     """
@@ -14,12 +15,12 @@ class MessageHandler:
     simple as adding a new '_handle_*' function to this object.
     """
 
+    # an inner class used for creating named tuple 'hear' messages
+    Message = collections.namedtuple("Message", "time sender message")
+
     def __init__(self, world_model, body_model):
         self.world_model = world_model
         self.body_model = body_model
-
-        # an inner class used for creating named tuple 'hear' messages
-        self.Message = collections.namedtuple("Message", "time sender message")
 
     def handle_message(self, msg):
         """
@@ -208,15 +209,49 @@ class MessageHandler:
 
         # handle messages from the referee, to update game state
         elif sender == "referee":
-            # TODO: handle ref messages
-            pass
+            # change the name for convenience's sake
+            mode = message
+
+            # deal first with messages that shouldn't be passed on to the agent
+
+            # keep track of scores by setting them to the value reported.  this
+            # precludes any possibility of getting out of sync with the server.
+            if mode.startswith(model.WorldModel.RefereeMessages.GOAL_L):
+                # split off the number, the part after the rightmost '_'
+                self.world_model.score_l = int(mode.rsplit("_", 1)[1])
+                return
+            elif mode.startswith(model.WorldModel.RefereeMessages.GOAL_R):
+                self.world_model.score_r = int(mode.rsplit("_", 1)[1])
+                return
+
+            # ignore these messages, but pass them on to the agent. these don't
+            # change state but could still be useful.
+            elif (mode == model.WorldModel.RefereeMessages.FOUL_L or
+                  mode == model.WorldModel.RefereeMessages.FOUL_R or
+                  mode == model.WorldModel.RefereeMessages.GOALIE_CATCH_BALL_L or
+                  mode == model.WorldModel.RefereeMessages.GOALIE_CATCH_BALL_R or
+                  mode == model.WorldModel.RefereeMessages.TIME_UP_WITHOUT_A_TEAM or
+                  mode == model.WorldModel.RefereeMessages.HALF_TIME or
+                  mode == model.WorldModel.RefereeMessages.TIME_EXTENDED):
+
+                # messages are named 3-tuples of (time, sender, message)
+                ref_msg = self.Message(time_recvd, sender, message)
+
+                # pass this message on to the player and return
+                self.world_model.last_message = ref_msg
+                return
+
+            # deal with messages that indicate game mode, but that the agent
+            # doesn't need to know about specifically.
+            else:
+                # set the mode to the referee reported mode string
+                self.world_model.play_mode = mode
+                return
 
         # all other messages are treated equally
         else:
-            # messages are named 3-tuples of (time, sender, message)
-            new_msg = self.Message(time_recvd, sender, message)
-
             # update the model's last heard message
+            new_msg = MessageHandler.Message(time_recvd, sender, message)
             self.world_model.prev_message = new_msg
 
     def _handle_sense_body(self, msg):
