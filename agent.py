@@ -229,7 +229,7 @@ class Agent:
                 return
             # dash towards the ball if it's within our field of view
             elif -5 < self.world.ball.direction < 5:
-                self.act_handler.dash(100)
+                self.act_handler.dash(65)
                 return
             # turn to face the ball
             else:
