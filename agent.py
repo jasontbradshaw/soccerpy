@@ -43,7 +43,7 @@ class Agent:
         if self.__connected:
             msg = "Cannot connect while already connected, disconnect first."
             raise sp_exceptions.AgentConnectionStateError(msg)
-        
+
         # the pipe through which all of our communication takes place
         self.__sock = sock.Socket(host, port)
 
@@ -60,7 +60,7 @@ class Agent:
         # set up our threaded message receiving system
         self.__parsing = True # tell thread that we're currently running
         self.__msg_thread = threading.Thread(target=self.__message_loop,
-                                           name="message_loop")
+                name="message_loop")
         self.__msg_thread.daemon = True # dies when parent thread dies
 
         # start processing received messages. this will catch the initial server
@@ -82,7 +82,7 @@ class Agent:
         # to play a game of robo-soccer.
         self.__thinking = False
         self.__think_thread = threading.Thread(target=self.__think_loop,
-                                             name="think_loop")
+                name="think_loop")
         self.__think_thread.daemon = True
 
         # set connected state.  done last to prevent state inconsistency if
@@ -244,15 +244,30 @@ if __name__ == "__main__":
     import sys
 
     # arg1: team name
-    # arg2: number of players to start
+    # arg2: number of players to create
 
     agentlist = []
+    total_agents = 0
     for agent in xrange(min(11, int(sys.argv[2]))):
+        print "Creating Agent %d:" % agent
+
+        print "  Initializing...",
         a = Agent()
+        print "\t[DONE]"
+
+        print "  Connecting...",
         a.connect("localhost", 6000, sys.argv[1])
+        print "\t[DONE]"
+
+        print "  Starting play...",
         a.play()
+        print "\t[DONE]"
 
         agentlist.append(a)
+        total_agents += 1
+
+    print
+    print "Launched %d agents." % total_agents
 
     try:
         while 1:
@@ -260,6 +275,8 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print "Disconnecting agents..."
         for agent in agentlist:
+            print "  Disconnecting...",
             agent.disconnect()
+            print "\t[DONE]"
         print "Agents disconnected."
 
