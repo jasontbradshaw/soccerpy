@@ -41,7 +41,7 @@ class WorldModel:
 
     class RefereeMessages:
         """
-        Contains possible non-mode messages sent by a referee.
+        Static class containing possible non-mode messages sent by a referee.
         """
 
         # these are referee messages, not play modes
@@ -98,7 +98,7 @@ class BodyModel:
         self.view_mode = (None, None)
         self.stamina = (None, None)
         self.speed = (None, None)
-        self.head_angle = None
+        self.neck_angle = None
 
         # counts of actions taken so far
         self.kick_count = None

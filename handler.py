@@ -108,10 +108,10 @@ class MessageHandler:
                     dist_change = members[2]
                     dir_change = members[3]
 
-                # include body/head values if present
+                # include body/neck values if present
                 if len(members) >= 6:
                     body_dir = members[4]
-                    head_dir = members[5]
+                    neck_dir = members[5]
 
             # parse flags
             if name[0] == 'f':
@@ -293,7 +293,7 @@ class MessageHandler:
             elif name == "speed":
                 self.bm.speed = tuple(values)
             elif name == "head_angle":
-                self.bm.head_angle = values[0]
+                self.bm.neck_angle = values[0]
 
             # these update the counts of the basic actions taken
             elif name == "kick":
