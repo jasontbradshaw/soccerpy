@@ -16,20 +16,27 @@ class Agent:
 
         # set all variables and important objects to appropriate values for
         # pre-connect state.
+
+        # the socket used to communicate with the server
         self.__sock = None
 
+        # models and the message handler for parsing and storing information
         self.wm = None
         self.bm = None
         self.msg_handler = None
-        self.act_handler = None
 
+        # parse thread and control variable
         self.__parsing = False
         self.__msg_thread = None
 
-        self.__thinking = False
+        self.__thinking = FalseO# think thread and control variable
         self.__think_thread = None
 
+        # whether we should run the think method
         self.__should_think_on_data = False
+
+        # whether we should send commands
+        self.__send_commands = False
 
     def connect(self, host, port, teamname, version=11):
         """
@@ -167,7 +174,12 @@ class Agent:
             # world model as-is.  the world model parses it and stores it within
             # itself for perusal at our leisure.
             raw_msg = self.__sock.recv()
-            self.msg_handler.handle_message(raw_msg)
+            msg_type = self.msg_handler.handle_message(raw_msg)
+
+            # we send commands all at once every cycle, ie. whenever a
+            # 'sense_body' command is received
+            if msg_type == handler.ActionHandler.CommandType.SENSE_BODY:
+                self.__send_commands = True
 
             # flag new data as needing the think loop's attention
             self.__should_think_on_data = True
@@ -182,6 +194,11 @@ class Agent:
         """
 
         while self.__thinking:
+            # tell the ActionHandler to send its enqueued messages if it is time
+            if self.__send_commands:
+                self.__send_commands = False
+                self.wm.ah.send_commands()
+
             # only think if new data has arrived
             if self.__should_think_on_data:
                 # flag that data has been processed.  this shouldn't be a race

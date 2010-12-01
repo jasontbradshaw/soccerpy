@@ -1,4 +1,5 @@
 import collections
+import Queue as queue
 
 import message_parser
 import sp_exceptions
@@ -31,7 +32,8 @@ class MessageHandler:
     def handle_message(self, msg):
         """
         Takes a raw message direct from the server, parses it, and stores its
-        data in the world and body model objects given at init.
+        data in the world and body model objects given at init.  Returns the
+        type of message received.
         """
 
         # get all the expressions contained in the given message
@@ -54,6 +56,9 @@ class MessageHandler:
         else:
             m = "Can't handle message type '%s', function '%s' not found."
             raise sp_exceptions.MessageTypeError(m % (parsed[0], msg_func))
+
+        # return the type of message received
+        return parsed[0]
 
     def _handle_see(self, msg):
         """
@@ -368,8 +373,36 @@ class ActionHandler:
     """
     Provides facilities for sending commands to the soccer server.  Contains all
     possible commands that can be sent, as well as everything needed to send
-    them.
+    them.  All basic command methods are aliases for placing that command in the
+    internal queue and sending it at the appropriate time.
     """
+
+    class CommandType:
+        """
+        A static class that defines all basic command types.
+        """
+
+        # whether the command can only be sent once per cycle or not
+        TYPE_PRIMARY = 0
+        TYPE_SECONDARY = 1
+
+        # command types corresponding to valid commands to send to the server
+        CATCH = "catch"
+        CHANGE_VIEW = "change_view"
+        DASH = "dash"
+        KICK = "kick"
+        MOVE = "move"
+        SAY = "say"
+        SENSE_BODY = "sense_body"
+        TURN = "turn"
+        TURN_NECK = "turn_neck"
+
+        def __init__(self):
+            raise NotImplementedError("Can't instantiate a CommandType, access "
+                    "its members through ActionHandler instead.")
+
+    # a command for our queue containing an id and command text
+    Command = collections.namedtuple("Command", "cmd_type text")
 
     def __init__(self, server_socket):
         """
@@ -378,6 +411,38 @@ class ActionHandler:
         """
 
         self.sock = server_socket
+
+        # this contains all requested actions for the current and future cycles
+        self.q = queue.Queue()
+
+    def send_commands(self):
+        """
+        Sends all the enqueued commands.
+        """
+
+        # we only send the most recent primary command
+        primary_cmd = None
+
+        # dequeue all enqueued commands and send them
+        while 1:
+            try:
+                cmd = self.q.get_nowait()
+            except queue.Empty:
+                break
+
+            # save the most recent primary command and send it at the very end
+            if cmd.cmd_type == ActionHandler.CommandType.TYPE_PRIMARY:
+                primary_cmd = cmd
+            # send other commands immediately
+            else:
+                self.sock.send(cmd.text)
+
+            # indicate that we finished processing a command
+            self.q.task_done()
+
+        # send the saved primary command, if there was one
+        if primary_cmd is not None:
+            self.sock.send(primary_cmd.text)
 
     def move(self, x, y):
         """
@@ -389,10 +454,11 @@ class ActionHandler:
 
         msg = "(move %.10f %.10f)" % (x, y)
 
-        if PRINT_SENT_COMMANDS:
-            print "send: ", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_PRIMARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
     def turn(self, relative_degrees):
         """
@@ -405,10 +471,11 @@ class ActionHandler:
 
         msg = "(turn %.10f)" % relative_degrees
 
-        if PRINT_SENT_COMMANDS:
-            print "send: ", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_PRIMARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
     def dash(self, power):
         """
@@ -417,10 +484,11 @@ class ActionHandler:
 
         msg = "(dash %.10f)" % power
 
-        if PRINT_SENT_COMMANDS:
-            print "send: ", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_PRIMARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
     def kick(self, power, relative_direction):
         """
@@ -430,10 +498,11 @@ class ActionHandler:
 
         msg = "(kick %.10f %.10f)" % (power, relative_direction)
 
-        if PRINT_SENT_COMMANDS:
-            print "send: ", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_PRIMARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
     def catch(self, relative_direction):
         """
@@ -443,10 +512,11 @@ class ActionHandler:
 
         msg = "(catch %.10f)" % relative_direction
 
-        if PRINT_SENT_COMMANDS:
-            print "send: ", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_PRIMARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
     def say(self, message):
         """
@@ -456,10 +526,11 @@ class ActionHandler:
 
         msg = "(say %s)" % message
 
-        if PRINT_SENT_COMMANDS:
-            print "send:", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_SECONDARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
     def turn_neck(self, relative_direction):
         """
@@ -469,8 +540,9 @@ class ActionHandler:
 
         msg = "(turn_neck %.10f)" % relative_direction
 
-        if PRINT_SENT_COMMANDS:
-            print "send: ", msg, "\n"
+        # create the command object for insertion into the queue
+        cmd_type = ActionHandler.CommandType.TYPE_SECONDARY
+        cmd = ActionHandler.Command(cmd_type, msg)
 
-        self.sock.send(msg)
+        self.q.put(cmd)
 
