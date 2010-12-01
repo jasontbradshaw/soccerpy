@@ -5,6 +5,9 @@ import sp_exceptions
 import game_object
 import model
 
+# turn message printing on/off
+DO_LOG = False
+
 class MessageHandler:
     """
     Handles all incoming messages from the server.  Parses their data and puts
@@ -57,7 +60,8 @@ class MessageHandler:
         the world model.
         """
 
-        print "see:", msg[1:], "\n"
+        if DO_LOG:
+            print "see:", msg[1:], "\n"
 
         # the simulation cycle of the soccer server
         sim_time = msg[1]
@@ -198,7 +202,8 @@ class MessageHandler:
         Parses audible information and turns it into useful information.
         """
 
-        print "hear:", msg[1:], "\n"
+        if DO_LOG:
+            print "hear:", msg[1:], "\n"
 
         time_recvd = msg[1] # server cycle when message was heard
         sender = msg[2] # name (or direction) of who sent the message
@@ -260,7 +265,8 @@ class MessageHandler:
         Deals with the agent's body model information.
         """
 
-        print "sense_body:", msg[1:], "\n"
+        if DO_LOG:
+            print "sense_body:", msg[1:], "\n"
 
         # update the body model information when received. each piece of info is
         # a list with the first item as the name of the data, and the rest as
@@ -306,28 +312,32 @@ class MessageHandler:
         Deals with player parameter information.
         """
 
-        print "player_param:", msg[1:], "\n"
+        if DO_LOG:
+            print "player_param:", msg[1:], "\n"
 
     def _handle_player_type(self, msg):
         """
         Handles player type information.
         """
 
-        print "player_type:", msg[1:], "\n"
+        if DO_LOG:
+            print "player_type:", msg[1:], "\n"
 
     def _handle_server_param(self, msg):
         """
         Stores server parameter information.
         """
 
-        print "server_param:", msg[1:], "\n"
+        if DO_LOG:
+            print "server_param:", msg[1:], "\n"
 
     def _handle_init(self, msg):
         """
         Deals with initialization messages sent by the server.
         """
 
-        print "init:", msg[1:], "\n"
+        if DO_LOG:
+            print "init:", msg[1:], "\n"
 
         # set the player's uniform number, side, and the play mode as returned
         # by the server directly after connecting.
@@ -379,7 +389,9 @@ class ActionHandler:
         """
 
         msg = "(move %.10f %.10f)" % (x, y)
-        print "send: ", msg, "\n"
+
+        if DO_LOG:
+            print "send: ", msg, "\n"
 
         self.sock.send(msg)
 
@@ -393,7 +405,9 @@ class ActionHandler:
         assert -180 <= relative_degrees <= 180
 
         msg = "(turn %.10f)" % relative_degrees
-        print "send: ", msg, "\n"
+
+        if DO_LOG:
+            print "send: ", msg, "\n"
 
         self.sock.send(msg)
 
@@ -403,7 +417,9 @@ class ActionHandler:
         """
 
         msg = "(dash %.10f)" % power
-        print "send: ", msg, "\n"
+
+        if DO_LOG:
+            print "send: ", msg, "\n"
 
         self.sock.send(msg)
 
@@ -414,7 +430,9 @@ class ActionHandler:
         """
 
         msg = "(kick %.10f %.10f)" % (power, relative_direction)
-        print "send: ", msg, "\n"
+
+        if DO_LOG:
+            print "send: ", msg, "\n"
 
         self.sock.send(msg)
 
@@ -425,7 +443,9 @@ class ActionHandler:
         """
 
         msg = "(catch %.10f)" % relative_direction
-        print "send: ", msg, "\n"
+
+        if DO_LOG:
+            print "send: ", msg, "\n"
 
         self.sock.send(msg)
 
@@ -436,7 +456,9 @@ class ActionHandler:
         """
 
         msg = "(say %s)" % message
-        print "send:", msg, "\n"
+
+        if DO_LOG:
+            print "send:", msg, "\n"
 
         self.sock.send(msg)
 
@@ -447,7 +469,9 @@ class ActionHandler:
         """
 
         msg = "(turn_neck %.10f)" % relative_direction
-        print "send: ", msg, "\n"
+
+        if DO_LOG:
+            print "send: ", msg, "\n"
 
         self.sock.send(msg)
 
