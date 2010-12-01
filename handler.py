@@ -25,8 +25,8 @@ class MessageHandler:
     Message = collections.namedtuple("Message", "time sender message")
 
     def __init__(self, world_model, body_model):
-        self.world_model = world_model
-        self.body_model = body_model
+        self.wm = world_model
+        self.bm = body_model
 
     def handle_message(self, msg):
         """
@@ -143,11 +143,11 @@ class MessageHandler:
                 side = None
                 if teamname is not None:
                     # if they're on our team, they're on our side
-                    if teamname == self.world_model.teamname:
-                        side = self.world_model.side
+                    if teamname == self.wm.teamname:
+                        side = self.wm.side
                     # otherwise, set side to the other team's side
                     else:
-                        if self.world_model.side == model.WorldModel.SIDE_L:
+                        if self.wm.side == model.WorldModel.SIDE_L:
                             side = model.WorldModel.SIDE_R
                         else:
                             side = model.WorldModel.SIDE_L
@@ -208,11 +208,11 @@ class MessageHandler:
                 raise ObjectTypeError("Unknown object: '" + str(obj) + "'")
 
         # change the data in the world model to the newly parsed data
-        self.world_model.ball = new_ball
-        self.world_model.flags = new_flags
-        self.world_model.goals = new_goals
-        self.world_model.players = new_players
-        self.world_model.lines = new_lines
+        self.wm.ball = new_ball
+        self.wm.flags = new_flags
+        self.wm.goals = new_goals
+        self.wm.players = new_players
+        self.wm.lines = new_lines
 
     def _handle_hear(self, msg):
         """
@@ -238,10 +238,10 @@ class MessageHandler:
             # precludes any possibility of getting out of sync with the server.
             if mode.startswith(model.WorldModel.RefereeMessages.GOAL_L):
                 # split off the number, the part after the rightmost '_'
-                self.world_model.score_l = int(mode.rsplit("_", 1)[1])
+                self.wm.score_l = int(mode.rsplit("_", 1)[1])
                 return
             elif mode.startswith(model.WorldModel.RefereeMessages.GOAL_R):
-                self.world_model.score_r = int(mode.rsplit("_", 1)[1])
+                self.wm.score_r = int(mode.rsplit("_", 1)[1])
                 return
 
             # ignore these messages, but pass them on to the agent. these don't
@@ -258,21 +258,21 @@ class MessageHandler:
                 ref_msg = self.Message(time_recvd, sender, message)
 
                 # pass this message on to the player and return
-                self.world_model.last_message = ref_msg
+                self.wm.last_message = ref_msg
                 return
 
             # deal with messages that indicate game mode, but that the agent
             # doesn't need to know about specifically.
             else:
                 # set the mode to the referee reported mode string
-                self.world_model.play_mode = mode
+                self.wm.play_mode = mode
                 return
 
         # all other messages are treated equally
         else:
             # update the model's last heard message
             new_msg = MessageHandler.Message(time_recvd, sender, message)
-            self.world_model.prev_message = new_msg
+            self.wm.prev_message = new_msg
 
     def _handle_sense_body(self, msg):
         """
@@ -287,31 +287,31 @@ class MessageHandler:
             values = info[1:]
 
             if name == "view_mode":
-                self.body_model.view_mode = tuple(values)
+                self.bm.view_mode = tuple(values)
             elif name == "stamina":
-                self.body_model.stamina = tuple(values)
+                self.bm.stamina = tuple(values)
             elif name == "speed":
-                self.body_model.speed = tuple(values)
+                self.bm.speed = tuple(values)
             elif name == "head_angle":
-                self.body_model.head_angle = values[0]
+                self.bm.head_angle = values[0]
 
             # these update the counts of the basic actions taken
             elif name == "kick":
-                self.body_model.kick_count = values[0]
+                self.bm.kick_count = values[0]
             elif name == "dash":
-                self.body_model.dash_count = values[0]
+                self.bm.dash_count = values[0]
             elif name == "turn":
-                self.body_model.turn_count = values[0]
+                self.bm.turn_count = values[0]
             elif name == "say":
-                self.body_model.say_count = values[0]
+                self.bm.say_count = values[0]
             elif name == "turn_neck":
-                self.body_model.turn_neck_count = values[0]
+                self.bm.turn_neck_count = values[0]
             elif name == "catch":
-                self.body_model.catch_count = values[0]
+                self.bm.catch_count = values[0]
             elif name == "move":
-                self.body_model.move_count = values[0]
+                self.bm.move_count = values[0]
             elif name == "change_view":
-                self.body_model.change_view_count = values[0]
+                self.bm.change_view_count = values[0]
 
             # we leave unknown values out of the equation
             else:
@@ -344,9 +344,9 @@ class MessageHandler:
         uniform_number = msg[2]
         play_mode = msg[3]
 
-        self.world_model.side = side
-        self.world_model.uniform_number = uniform_number
-        self.world_model.play_mode = play_mode
+        self.wm.side = side
+        self.wm.uniform_number = uniform_number
+        self.wm.play_mode = play_mode
 
     def _handle_error(self, msg):
         """
