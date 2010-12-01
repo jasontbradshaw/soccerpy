@@ -97,6 +97,101 @@ class WorldModel:
         # the mode the game is currently in (default to not playing yet)
         self.play_mode = WorldModel.PlayModes.BEFORE_KICK_OFF
 
+    def is_before_kick_off(self):
+        """
+        Tells us whether the game is in a pre-kickoff state.
+        """
+
+        return self.play_mode == WorldModel.PlayModes.BEFORE_KICK_OFF
+
+    def is_kick_off_us(self):
+        """
+        Tells us whether it's our turn to kick off.
+        """
+
+    def is_dead_ball_them(self):
+        """
+        Returns whether the ball is currently dead by the other team's fault.
+        """
+
+    def is_ball_kickable(self):
+        """
+        Tells us whether the ball is in reach and able to be kicked.
+        """
+
+    def get_ball_speed_max(self):
+        """
+        Returns the maximum speed the ball can be kicked at.
+        """
+
+    def kick_to(self, position, speed):
+        """
+        Kick the ball to some position with some speed.
+        """
+
+    def intercept(self, should_intercept):
+        """
+        TODO: what does this do?
+        """
+
+    def turn_neck_to_object(self, obj):
+        """
+        Turns the player's neck to a given object.
+        """
+
+    def get_strategic_position(self):
+        """
+        Returns a good position for the player to be in relative to its starting
+        position and other variables.
+        """
+
+    def get_distance_to(self, point):
+        """
+        Returns the linear distance to some point on the field from the current
+        point.
+        """
+
+    def turn_body_to_point(self, point):
+        """
+        Turns the agent's body to face a given point on the field.
+        """
+
+    def teleport_to_pos(self, point):
+        """
+        Teleports the player to a given point using the 'move' command.
+        """
+
+    def align_neck_with_body(self):
+        """
+        Turns the player's neck to be in line with its body, making the angle
+        between the two 0 degrees.
+        """
+
+    def get_fastest_teammate_to_point(self, point):
+        """
+        Returns the uniform number of the fastest teammate to some point.
+        """
+
+    def get_stamina(self):
+        """
+        Returns the agent's current stamina.
+        """
+
+    def get_recovery(self):
+        """
+        Returns something...
+        """
+
+    def get_stamina_max(self):
+        """
+        Returns the maximum amount of stamina a player can have.
+        """
+
+    def turn_body_to_object(self, obj):
+        """
+        Turns the player's body to face a particular object.
+        """
+
 class BodyModel:
     """
     Represents the agent's view of its own body.
