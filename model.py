@@ -64,7 +64,15 @@ class WorldModel:
             raise NotImplementedError("Don't instantiate a RefereeMessages class,"
                     " access it statically through WorldModel instead.")
 
-    def __init__(self):
+    def __init__(self, action_handler):
+        """
+        Create the world model with default values and an ActionHandler class it
+        can use to complete requested actions.
+        """
+
+        # we use the action handler to complete complex commands
+        self.ah = action_handler
+
         # these variables store all objects for any particular game step
         self.ball = None
         self.goals = []

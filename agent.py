@@ -48,7 +48,7 @@ class Agent:
         self.__sock = sock.Socket(host, port)
 
         # our models of the world and our body
-        self.wm = WorldModel()
+        self.wm = WorldModel(handler.ActionHandler(self.__sock))
         self.bm = BodyModel()
 
         # set the team name of the world model to the given name
@@ -56,9 +56,6 @@ class Agent:
 
         # handles all messages received from the server
         self.msg_handler = handler.MessageHandler(self.wm, self.bm)
-
-        # handles the sending of actions to the server
-        self.act_handler = handler.ActionHandler(self.__sock)
 
         # set up our threaded message receiving system
         self.__parsing = True # tell thread that we're currently running
@@ -220,7 +217,7 @@ class Agent:
 
         # move to a random field position on first call
         if not self.moved:
-            self.act_handler.move(1000, 1000)
+            self.wm.ah.move(1000, 1000)
             self.moved = True
 
         # perform random-play strategy
@@ -233,33 +230,33 @@ class Agent:
                     # ours.
                     if g.goal_id is not None:
                         if g.goal_id != self.wm.side:
-                            self.act_handler.say("K")
-                            self.act_handler.kick(100, g.direction)
+                            self.wm.ah.say("K")
+                            self.wm.ah.kick(100, g.direction)
                             return
                     # kick towards the first friendly player
                     else:
                         for p in self.wm.players:
                             if p.side == self.wm.side:
-                                self.act_handler.kick(100, p.direction)
+                                self.wm.ah.kick(100, p.direction)
                                 return
                 else:
                     # search for goal otherwise 
                     d = random.randint(0, 10)
-                    self.act_handler.kick(-5, -5 + d)
+                    self.wm.ah.kick(-5, -5 + d)
                     return
             # dash towards the ball if it's within our field of view and we can
             # move.
             elif (-7 < self.wm.ball.direction < 7 and
                     self.wm.play_mode != WorldModel.PlayModes.BEFORE_KICK_OFF):
-                self.act_handler.dash(50)
+                self.wm.ah.dash(50)
                 return
             # turn to face the ball
             else:
-                self.act_handler.turn(self.wm.ball.direction / 2)
+                self.wm.ah.turn(self.wm.ball.direction / 2)
                 return
         else:
             # search for the ball
-            self.act_handler.turn(30 + random.randint(0, 10))
+            self.wm.ah.turn(30 + random.randint(0, 10))
             return
 
 if __name__ == "__main__":
