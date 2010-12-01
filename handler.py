@@ -5,8 +5,11 @@ import sp_exceptions
 import game_object
 import model
 
-# turn message printing on/off
-DO_LOG = False
+# should we print messages received from the server?
+PRINT_SERVER_MESSAGES = False
+
+# should we print commands sent to the server?
+PRINT_SENT_COMMANDS = False
 
 class MessageHandler:
     """
@@ -34,6 +37,9 @@ class MessageHandler:
         # get all the expressions contained in the given message
         parsed = message_parser.parse(msg)
 
+        if PRINT_SERVER_MESSAGES:
+            print parsed[0] + ":", parsed[1:], "\n"
+
         # this is the name of the function that should be used to handle
         # this message type.  we pull it from this object dynamically to
         # avoid having a huge if/elif/.../else statement. this should be both
@@ -59,9 +65,6 @@ class MessageHandler:
         each list into its own game object, then insert those game objects into
         the world model.
         """
-
-        if DO_LOG:
-            print "see:", msg[1:], "\n"
 
         # the simulation cycle of the soccer server
         sim_time = msg[1]
@@ -202,9 +205,6 @@ class MessageHandler:
         Parses audible information and turns it into useful information.
         """
 
-        if DO_LOG:
-            print "hear:", msg[1:], "\n"
-
         time_recvd = msg[1] # server cycle when message was heard
         sender = msg[2] # name (or direction) of who sent the message
         message = msg[3] # message string
@@ -265,9 +265,6 @@ class MessageHandler:
         Deals with the agent's body model information.
         """
 
-        if DO_LOG:
-            print "sense_body:", msg[1:], "\n"
-
         # update the body model information when received. each piece of info is
         # a list with the first item as the name of the data, and the rest as
         # the values.
@@ -312,32 +309,20 @@ class MessageHandler:
         Deals with player parameter information.
         """
 
-        if DO_LOG:
-            print "player_param:", msg[1:], "\n"
-
     def _handle_player_type(self, msg):
         """
         Handles player type information.
         """
-
-        if DO_LOG:
-            print "player_type:", msg[1:], "\n"
 
     def _handle_server_param(self, msg):
         """
         Stores server parameter information.
         """
 
-        if DO_LOG:
-            print "server_param:", msg[1:], "\n"
-
     def _handle_init(self, msg):
         """
         Deals with initialization messages sent by the server.
         """
-
-        if DO_LOG:
-            print "init:", msg[1:], "\n"
 
         # set the player's uniform number, side, and the play mode as returned
         # by the server directly after connecting.
@@ -390,7 +375,7 @@ class ActionHandler:
 
         msg = "(move %.10f %.10f)" % (x, y)
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send: ", msg, "\n"
 
         self.sock.send(msg)
@@ -406,7 +391,7 @@ class ActionHandler:
 
         msg = "(turn %.10f)" % relative_degrees
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send: ", msg, "\n"
 
         self.sock.send(msg)
@@ -418,7 +403,7 @@ class ActionHandler:
 
         msg = "(dash %.10f)" % power
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send: ", msg, "\n"
 
         self.sock.send(msg)
@@ -431,7 +416,7 @@ class ActionHandler:
 
         msg = "(kick %.10f %.10f)" % (power, relative_direction)
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send: ", msg, "\n"
 
         self.sock.send(msg)
@@ -444,7 +429,7 @@ class ActionHandler:
 
         msg = "(catch %.10f)" % relative_direction
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send: ", msg, "\n"
 
         self.sock.send(msg)
@@ -457,7 +442,7 @@ class ActionHandler:
 
         msg = "(say %s)" % message
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send:", msg, "\n"
 
         self.sock.send(msg)
@@ -470,7 +455,7 @@ class ActionHandler:
 
         msg = "(turn_neck %.10f)" % relative_direction
 
-        if DO_LOG:
+        if PRINT_SENT_COMMANDS:
             print "send: ", msg, "\n"
 
         self.sock.send(msg)
