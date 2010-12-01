@@ -237,7 +237,7 @@ class Agent:
                 return
         else:
             # search for the ball
-            self.act_handler.turn(10 + random.randint(0, 10))
+            self.act_handler.turn(30 + random.randint(0, 10))
             return
 
 if __name__ == "__main__":
