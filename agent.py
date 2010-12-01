@@ -29,6 +29,8 @@ class Agent:
         self.__thinking = False
         self.__think_thread = None
 
+        self.__should_think_on_data = False
+
     def connect(self, host, port, teamname, version=11):
         """
         Gives us a connection to the server as one player on a team.  This
@@ -42,9 +44,6 @@ class Agent:
             msg = "Cannot connect while already connected, disconnect first."
             raise sp_exceptions.AgentConnectionStateError(msg)
         
-        # set connected state
-        self.__connected = True
-
         # the pipe through which all of our communication takes place
         self.__sock = sock.Socket(host, port)
 
@@ -86,6 +85,10 @@ class Agent:
                                              name="think_loop")
         self.__think_thread.daemon = True
 
+        # set connected state.  done last to prevent state inconsistency if
+        # something goes wrong beforehand.
+        self.__connected = True
+
     def play(self):
         """
         Kicks off the thread that does the agent's thinking, allowing it to play
@@ -108,6 +111,7 @@ class Agent:
 
         # tell the thread that it should be running, then start it
         self.__thinking = True
+        self.__should_think_on_data = True
         self.__think_thread.start()
 
     def disconnect(self):
@@ -129,7 +133,7 @@ class Agent:
         if not self.__connected:
             return
 
-        # tell the message loop to terminate
+        # tell the loops to terminate
         self.__parsing = False
         self.__thinking = False
 
@@ -140,10 +144,10 @@ class Agent:
         # don't join them if they haven't been started (this can happen if
         # disconnect is called very quickly after connect).
         if self.__msg_thread.is_alive():
-            self.__msg_thread.join(0.1)
+            self.__msg_thread.join(0.01)
 
         if self.__think_thread.is_alive():
-            self.__think_thread.join(0.1)
+            self.__think_thread.join(0.01)
 
         # reset all standard variables in this object.  self.__connected gets
         # reset here, along with all other non-user defined internal variables.
@@ -165,6 +169,9 @@ class Agent:
             raw_msg = self.__sock.recv()
             self.msg_handler.handle_message(raw_msg)
 
+            # flag new data as needing the think loop's attention
+            self.__should_think_on_data = True
+
     def __think_loop(self):
         """
         Performs world model analysis and sends appropriate commands to the
@@ -174,18 +181,20 @@ class Agent:
         play method to start play, and the disconnect method to end it.
         """
 
-        # TODO: prevent the think method from being run too often, as it spams
-        # the server with messages currently and slows things down ALOT.
-
         while self.__thinking:
-            # performs the actions necessary for the agent to play soccer
-            self.think()
+            # only think if new data has arrived
+            if self.__should_think_on_data:
+                # flag that data has been processed.  this shouldn't be a race
+                # condition, since the only change would be to make it True
+                # before changing it to False again, and we're already going to
+                # process data, so it doesn't make any difference.
+                self.__should_think_on_data = False
 
-            # this is necessary to allow our socket some time to recv messages,
-            # as well as allowing us to send them.  this occurs since we use
-            # threads, which in python share the same physical process.  if we
-            # eat up all the time trying to send messages, we never recv any.
-            time.sleep(0.0001)
+                # performs the actions necessary for the agent to play soccer
+                self.think()
+            else:
+                # prevent from burning up all the cpu time while waiting for data
+                time.sleep(0.0001)
 
     def setup_environment(self):
         """
@@ -202,7 +211,7 @@ class Agent:
         iteration of our think loop.
         """
 
-        # DEBUG
+        # DEBUG:  tells us if a thread dies
         if not self.__think_thread.is_alive() or not self.__msg_thread.is_alive():
             raise Exception("A thread died.")
 
