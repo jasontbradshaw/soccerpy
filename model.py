@@ -8,6 +8,10 @@ class WorldModel:
     data.
     """
 
+    # constants for team sides
+    SIDE_L = "l"
+    SIDE_R = "r"
+
     class PlayModes:
         """
         Acts as a static class containing variables for all valid play modes.
@@ -71,6 +75,9 @@ class WorldModel:
         # scores for each side
         self.score_l = 0
         self.score_r = 0
+
+        # the name of the agent's team
+        self.teamname = None
 
         # handle player information, like uniform number and side
         self.side = None

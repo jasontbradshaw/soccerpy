@@ -51,6 +51,9 @@ class Agent:
         self.world = model.WorldModel()
         self.body = model.BodyModel()
 
+        # set the team name of the world model to the given name
+        self.world.teamname = teamname
+
         # handles all messages received from the server
         self.msg_handler = handler.MessageHandler(self.world, self.body)
 

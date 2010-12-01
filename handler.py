@@ -92,7 +92,7 @@ class MessageHandler:
             dist_change = None
             dir_change = None
             body_dir = None
-            head_dir = None
+            neck_dir = None
 
             # a single item object means only direction
             if len(members) == 1:
@@ -131,7 +131,6 @@ class MessageHandler:
                 # extract any available information from the player object's name
                 teamname = None
                 uniform_number = None
-                position = "player"  # gets changed to 'goalie' if goalie
 
                 if len(name) >= 2:
                     teamname = name[1]
@@ -140,11 +139,26 @@ class MessageHandler:
                 if len(name) >= 4:
                     position = name[3]
 
-                # TODO: figure out what a 'p' message looks like, exactly
-                # (speed? body/neck dirs? uniform number?).
+                # figure out the player's side
+                side = None
+                if teamname is not None:
+                    # if they're on our team, they're on our side
+                    if teamname == self.world_model.teamname:
+                        side = self.world_model.side
+                    # otherwise, set side to the other team's side
+                    else:
+                        if self.world_model.side == model.WorldModel.SIDE_L:
+                            side = model.WorldModel.SIDE_R
+                        else:
+                            side = model.WorldModel.SIDE_L
+
+                # calculate player's speed
+                speed = None
+                # TODO: calculate player's speed!
+
                 new_players.append(game_object.Player(distance, direction,
-                    dist_change, dir_change, None, position, teamname, None,
-                    uniform_number, None, None))
+                    dist_change, dir_change, speed, teamname, side,
+                    uniform_number, body_dir, neck_dir))
 
             # parse goals
             elif name[0] == 'g':
@@ -187,7 +201,7 @@ class MessageHandler:
             # an out-of-view player
             elif name[0] == 'P':
                 new_players.append(game_object.Player(None, None, None, None,
-                    None, None, None, None, None, None, None))
+                    None, None, None, None, None, None))
 
             # an unhandled object type
             else:

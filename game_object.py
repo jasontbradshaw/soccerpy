@@ -78,15 +78,13 @@ class Player(MobileObject):
     """
 
     def __init__(self, distance, direction, dist_change, dir_change, speed,
-            position, team, side, uniform_number, body_direction,
-            neck_direction):
+            team, side, uniform_number, body_direction, neck_direction):
         """
         Adds player-specific information to a mobile object.
         """
 
         self.team = team
         self.side = side
-        self.position = position
         self.uniform_number = uniform_number
         self.body_direction = body_direction
         self.neck_direction = neck_direction
