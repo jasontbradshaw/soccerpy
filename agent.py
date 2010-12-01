@@ -265,6 +265,11 @@ class Agent:
 if __name__ == "__main__":
     import sys
 
+    # enforce corrent number of arguments, print help otherwise
+    if len(sys.argv) < 3:
+        print "args: ./agent.py <team_name> <num_players>"
+        sys.exit()
+
     # arg1: team name
     # arg2: number of players to create
 
