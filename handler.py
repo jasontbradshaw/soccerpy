@@ -456,6 +456,9 @@ class ActionHandler:
                 primary_cmd = cmd
             # send other commands immediately
             else:
+                if PRINT_SENT_COMMANDS:
+                    print "sent:", cmd.text, "\n"
+
                 self.sock.send(cmd.text)
 
             # indicate that we finished processing a command
@@ -463,6 +466,9 @@ class ActionHandler:
 
         # send the saved primary command, if there was one
         if primary_cmd is not None:
+            if PRINT_SENT_COMMANDS:
+                print "sent:", primary_cmd.text, "\n"
+
             self.sock.send(primary_cmd.text)
 
     def move(self, x, y):
