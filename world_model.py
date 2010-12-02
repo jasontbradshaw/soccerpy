@@ -149,7 +149,7 @@ class WorldModel:
 
         return None
 
-    def triangulate_position(self, flags, flag_dict, angle_step=30):
+    def triangulate_position(self, flags, flag_dict, angle_step=36):
         """
         Returns a best-guess position based on the triangulation via distances
         to all flags in the flag list given.  'angle_step' specifies the
@@ -208,29 +208,25 @@ class WorldModel:
             rand_center = (random.randint(-55, 55), random.randint(-35, 35))
             centers.add(rand_center)
 
-        # we cluster until sets don't change after an iteration
+        # cluster for some iterations before the latest result
         latest = {}
         cur = {}
-
-        # cluster for some iterations before returning result so far
         for i in xrange(num_cluster_iterations):
             # initialze cluster lists
             for c in centers:
                 cur[c] = []
 
-            # check every point
+            # put every point into the list of its nearest cluster center
             for p in points:
-                # find nearest cluster center
-                nearest = None
-                nearest_d = 0
-                for c in centers:
-                    d = self.euclidean_distance(c, p)
-                    if d < nearest_d or nearest is None:
-                        nearest = c
-                        nearest_d = d
+                # get a list of (distance to center, center coords) tuples
+                c_dists = map(lambda c: (self.euclidean_distance(c, p), c),
+                             centers)
+
+                # find the smallest tuple's c (second item)
+                nearest_center = min(c_dists)[1]
 
                 # add point to this center's cluster
-                cur[nearest].append(p)
+                cur[nearest_center].append(p)
 
             # recompute centers
             new_centers = set([])
