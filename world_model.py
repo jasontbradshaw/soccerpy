@@ -168,6 +168,7 @@ class WorldModel:
         Tells us whether the ball is in reach of the current player.
         """
 
+        # ball must be visible, not behind us, and within the kickable margin
         return (self.ball is not None and
                 self.ball.distance is not None and
                 self.ball.distance <= self.server_settings.kickable_margin)
@@ -179,16 +180,16 @@ class WorldModel:
 
         return self.server_settings.ball_speed_max
 
-    def kick_to(self, position, speed):
+    def kick_to(self, point, speed):
         """
-        Kick the ball to some position with some speed.
+        Kick the ball to some point with some ending speed at that point.
         """
 
         # TODO: predict angle and model speed at end
 
     def intercept(self, should_intercept):
         """
-        TODO: what does this do?
+        Intercept the ball at its calculated end position.
         """
 
         # TODO: model ball movement and trajectory
@@ -205,6 +206,8 @@ class WorldModel:
         Returns a good position for the player to be in relative to its starting
         position and other variables.
         """
+
+        # TODO: do we even want to do this?
 
     def get_distance_to(self, point):
         """
@@ -234,26 +237,29 @@ class WorldModel:
         between the two 0 degrees.
         """
 
-        # TODO: need body model inside world model
+        # neck angle is relative to body, so we turn it back the inverse way
+        self.ah.turn_neck(self.neck_direction * -1)
 
     def get_fastest_teammate_to_point(self, point):
         """
         Returns the uniform number of the fastest teammate to some point.
         """
 
+        # TODO: need movement model
+
     def get_stamina(self):
         """
         Returns the agent's current stamina amount.
         """
 
-        return self.stamina[0]
+        return self.stamina
 
     def get_recovery(self):
         """
         Returns something.
         """
 
-        # TODO: need body model inside world model
+        # TODO: what is this exactly?
 
     def get_stamina_max(self):
         """
