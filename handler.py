@@ -71,6 +71,7 @@ class MessageHandler:
         """
 
         # the simulation cycle of the soccer server
+        # TODO: we should probably use this somewhere...
         sim_time = msg[1]
 
         # store new values before changing those in the world model.  all new
@@ -217,6 +218,10 @@ class MessageHandler:
         self.wm.goals = new_goals
         self.wm.players = new_players
         self.wm.lines = new_lines
+
+        # tell the WorldModel to update any internal variables based on the
+        # newly gleaned information.
+        self.wm.process_new_info()
 
     def _handle_hear(self, msg):
         """

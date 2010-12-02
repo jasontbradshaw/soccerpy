@@ -116,8 +116,40 @@ class WorldModel:
         self.move_count = None
         self.change_view_count = None
 
+        # apparent player coordinates
+        self.coordinates = (None, None)
+
         # create a new server parameter object for holding all server params
         self.server_parameters = ServerParameters()
+
+    def process_new_info(self):
+        """
+        Update any internal variables based on the currently available
+        information.  This calculates information not available directly from
+        server-reported messages, such as player coordinates.
+        """
+
+        # a list of all calculated coordinate pairs that we'll turn into a
+        # single coordinate later.
+        guessed_coords = []
+
+        # update the apparent coordinates of the player based on all flag pairs
+        flag_coords = game_object.Flag.FLAG_COORDS
+        for i in xrange(len(self.flags)):
+            cur = self.flags[i]
+
+            # skip if flag isn't in dict
+            if cur not in flag_dict:
+                continue
+
+            for other in self.flags[i + 1:]:
+                # skip if flag isn't in dict
+                if other not in flag_coords):
+                    continue
+
+                # calculate coordinates
+
+
 
     def is_before_kick_off(self):
         """
@@ -288,13 +320,13 @@ class ServerParameters:
         self.audio_cut_dist = 50
         self.auto_mode = 0
         self.back_passes = 1
-        self.ball_accel_max = 2.7000000000000002
-        self.ball_decay = 0.93999999999999995
-        self.ball_rand = 0.050000000000000003
-        self.ball_size = 0.085000000000000006
-        self.ball_speed_max = 2.7000000000000002
+        self.ball_accel_max = 2.7
+        self.ball_decay = 0.94
+        self.ball_rand = 0.05
+        self.ball_size = 0.085
+        self.ball_speed_max = 2.7
         self.ball_stuck_area = 3
-        self.ball_weight = 0.20000000000000001
+        self.ball_weight = 0.2
         self.catch_ban_cycle = 5
         self.catch_probability = 1
         self.catchable_area_l = 2
@@ -314,14 +346,14 @@ class ServerParameters:
         self.coach_w_referee = 0
         self.connect_wait = 300
         self.control_radius = 2
-        self.dash_power_rate =0.0060000000000000001
+        self.dash_power_rate =0.006
         self.drop_ball_time = 200
-        self.effort_dec = 0.0050000000000000001
-        self.effort_dec_thr = 0.29999999999999999
+        self.effort_dec = 0.005
+        self.effort_dec_thr = 0.3
         self.effort_inc = 0.01
-        self.effort_inc_thr = 0.59999999999999998
+        self.effort_inc_thr = 0.6
         self.effort_init = 1
-        self.effort_min = 0.59999999999999998
+        self.effort_min = 0.6
         self.forbid_kick_off_offside = 1
         self.free_kick_faults = 1
         self.freeform_send_period = 20
@@ -357,7 +389,7 @@ class ServerParameters:
         self.kick_rand = 0
         self.kick_rand_factor_l = 1
         self.kick_rand_factor_r = 1
-        self.kickable_margin = 0.69999999999999996
+        self.kickable_margin = 0.7
         self.landmark_file = '~/.rcssserver-landmark.xml'
         self.log_date_format = '%Y%m%d%H%M-'
         self.log_times = 0
@@ -373,7 +405,7 @@ class ServerParameters:
         self.nr_extra_halfs = 2
         self.nr_normal_halfs = 2
         self.offside_active_area_size = 2.5
-        self.offside_kick_margin = 9.1500000000000004
+        self.offside_kick_margin = 9.15
         self.olcoach_port = 6002
         self.old_coach_hear = 0
         self.pen_allow_mult_kicks = 1
@@ -389,9 +421,9 @@ class ServerParameters:
         self.pen_taken_wait = 200
         self.penalty_shoot_outs = 1
         self.player_accel_max = 1
-        self.player_decay = 0.40000000000000002
-        self.player_rand = 0.10000000000000001
-        self.player_size = 0.29999999999999999
+        self.player_decay = 0.4
+        self.player_rand = 0.1
+        self.player_size = 0.3
         self.player_speed_max = 1.2
         self.player_weight = 60
         self.point_to_ban = 5
@@ -401,11 +433,11 @@ class ServerParameters:
         self.prand_factor_r = 1
         self.profile = 0
         self.proper_goal_kicks = 0
-        self.quantize_step = 0.10000000000000001
+        self.quantize_step = 0.1
         self.quantize_step_l = 0.01
         self.record_messages = 0
         self.recover_dec = 0.002
-        self.recover_dec_thr = 0.29999999999999999
+        self.recover_dec_thr = 0.3
         self.recover_init = 1
         self.recover_min = 0.5
         self.recv_step = 10
