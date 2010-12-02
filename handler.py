@@ -336,6 +336,11 @@ class MessageHandler:
         """
         Stores server parameter information.
         """
+        
+        # each list is two items: a value name and its value.  we add them all
+        # to the ServerParameters class inside WorldModel programmatically.
+        for param in msg[1:]:
+            pass
 
     def _handle_init(self, msg):
         """
