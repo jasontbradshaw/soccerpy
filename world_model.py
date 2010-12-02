@@ -338,6 +338,8 @@ class WorldModel:
         ko_left = WorldModel.PlayModes.KICK_OFF_L
         ko_right = WorldModel.PlayModes.KICK_OFF_R
 
+        print self.play_mode
+
         # return whether we're on the side that's kicking off
         return (self.side == WorldModel.SIDE_L and self.play_mode == ko_left or
                 self.side == WorldModel.SIDE_R and self.play_mode == ko_right)
@@ -375,14 +377,14 @@ class WorldModel:
         # ball must be visible, not behind us, and within the kickable margin
         return (self.ball is not None and
                 self.ball.distance is not None and
-                self.ball.distance <= self.server_settings.kickable_margin)
+                self.ball.distance <= self.server_parameters.kickable_margin)
 
     def get_ball_speed_max(self):
         """
         Returns the maximum speed the ball can be kicked at.
         """
 
-        return self.server_settings.ball_speed_max
+        return self.server_parameters.ball_speed_max
 
     def kick_to(self, point, extra_power=0.0):
         """
@@ -410,7 +412,7 @@ class WorldModel:
 
         # find the required power given ideal conditions, then add scale up by
         # difference bewteen actual aceivable power and maxpower.
-        required_power = dist_ratio * self.server_settings.maxpower
+        required_power = dist_ratio * self.server_parameters.maxpower
         effective_power = self.get_effective_kick_power(self.ball,
                 required_power)
         required_power += 1 - (effective_power / required_power)
@@ -434,15 +436,15 @@ class WorldModel:
 
         # first we get effective kick power:
         # limit kick_power to be between minpower and maxpower
-        kick_power = max(min(power, self.server_settings.maxpower),
-                self.server_settings.minpower)
+        kick_power = max(min(power, self.server_parameters.maxpower),
+                self.server_parameters.minpower)
 
         # scale it by the kick_power rate
-        kick_power *= self.server_settings.kick_power_rate
+        kick_power *= self.server_parameters.kick_power_rate
 
         # now we calculate the real effective power...
         a = 0.25 * (ball.direction / 180)
-        b = 0.25 * (ball.distance / self.server_settings.kickable_margin)
+        b = 0.25 * (ball.distance / self.server_parameters.kickable_margin)
 
         # ...and then return it
         return 1 - a - b
@@ -508,7 +510,8 @@ class WorldModel:
         """
 
         # neck angle is relative to body, so we turn it back the inverse way
-        self.ah.turn_neck(self.neck_direction * -1)
+        if self.neck_direction is not None:
+            self.ah.turn_neck(self.neck_direction * -1)
 
     def get_nearest_teammate_to_point(self, point):
         """
@@ -543,7 +546,7 @@ class WorldModel:
         Returns the maximum amount of stamina a player can have.
         """
 
-        return self.server_settings.stamina_max
+        return self.server_parameters.stamina_max
 
     def turn_body_to_object(self, obj):
         """
