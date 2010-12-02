@@ -84,14 +84,15 @@ class Flag(GameObject):
             "lb30": (-60, -30),
 
             # goal flags ('t' and 'b' flags can change based on server parameter
-            # 'goal_width' and are left unspecified).
-            "glt": (-55, None),
+            # 'goal_width', but we leave their coords as the default values.
+            # TODO: make goal flag coords dynamic based on server_params
+            "glt": (-55, 7.01),
             "gl": (-55, 0),
-            "glb": (-55, None),
+            "glb": (-55, -7.01),
 
-            "grt": (55, None),
+            "grt": (55, 7.01),
             "gr": (55, 0),
-            "grb": (55, None),
+            "grb": (55, -7.01),
 
             # penalty flags
             "plt": (-35, 20),

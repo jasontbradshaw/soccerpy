@@ -133,11 +133,8 @@ class WorldModel:
 
         points = []
         for f in flags:
-            # skip flags without distance information, a specific id, or the
-            # goal post flags.
-            # TODO: fix goal post flag coords!
-            if (f.distance is None or f.flag_id not in flag_dict or
-                    flag_dict[f.flag_id][1] is None):
+            # skip flags without distance information or without a specific id
+            if f.distance is None or f.flag_id not in flag_dict:
                 continue
 
             # generate points every 'angle_step' degrees around each flag,
