@@ -381,12 +381,68 @@ class WorldModel:
 
         return self.server_settings.ball_speed_max
 
-    def kick_to(self, point, speed):
+    def kick_to(self, point, extra_power=0.0):
         """
-        Kick the ball to some point with some ending speed at that point.
+        Kick the ball to some point with some extra-power factor added on.
+        extra_power=0.0 means the ball should stop at the given point, anything
+        higher means it should have proportionately more speed.
         """
 
-        # TODO: predict angle and model speed at end
+        # how far are we from the desired point?
+        point_dist = self.euclidean_distance(self.abs_coords, point)
+
+        # get absolute direction to the point
+        abs_point_dir = self.angle_between_points(self.abs_coords, point)
+
+        # get relative direction to point from body, since kicks are relative to
+        # body direction.
+        rel_point_dir = self.abs_body_dir - abs_point_dir
+
+        # we do a simple linear interpolation to calculate final kick speed,
+        # assuming a kick of power 100 goes 45 units in the given direction.
+        # these numbers were obtained from section 4.5.3 of the documentation.
+        # TODO: this will fail if parameters change, needs to be more flexible
+        max_kick_dist = 45.0
+        dist_ratio = point_dist / max_kick_dist
+
+        # find the required power given ideal conditions, then add scale up by
+        # difference bewteen actual aceivable power and maxpower.
+        required_power = dist_ratio * self.server_settings.maxpower
+        effective_power = self.get_effective_kick_power(self.ball,
+                required_power)
+        required_power += 1 - (effective_power / required_power)
+
+        # add more power!
+        power_mod = 1.0 + extra_power
+        power = required_power * power_mod
+
+        # do the kick, finally
+        self.ah.kick(rel_point_dir, power)
+
+    def get_effective_kick_power(self, ball, power):
+        """
+        Returns the effective power of a kick given a ball object.  See formula
+        4.21 in the documentation for more details.
+        """
+
+        # we can't calculate if we don't have a distance to the ball
+        if ball.distance is None:
+            return
+
+        # first we get effective kick power:
+        # limit kick_power to be between minpower and maxpower
+        kick_power = max(min(power, self.server_settings.maxpower),
+                self.server_settings.minpower)
+
+        # scale it by the kick_power rate
+        kick_power *= self.server_settings.kick_power_rate
+
+        # now we calculate the real effective power...
+        a = 0.25 * (ball.direction / 180)
+        b = 0.25 * (ball.distance / self.server_settings.kickable_margin)
+
+        # ...and then return it
+        return 1 - a - b
 
     def intercept(self, should_intercept):
         """
