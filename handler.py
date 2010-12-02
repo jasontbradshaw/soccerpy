@@ -305,7 +305,7 @@ class MessageHandler:
                 self.wm.speed_amount = values[0]
                 self.wm.speed_direction = values[1]
             elif name == "head_angle":
-                self.wm.neck_angle = values[0]
+                self.wm.neck_direction = values[0]
 
             # these update the counts of the basic actions taken
             elif name == "kick":

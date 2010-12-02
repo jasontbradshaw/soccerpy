@@ -107,7 +107,7 @@ class WorldModel:
         self.effort = None
         self.speed_amount = None
         self.speed_direction = None
-        self.neck_angle = None
+        self.neck_direction = None
 
         # counts of actions taken so far
         self.kick_count = None
@@ -119,13 +119,37 @@ class WorldModel:
         self.move_count = None
         self.change_view_count = None
 
-        # apparent player coordinates
-        self.coordinates = (None, None)
+        # apparent absolute player coordinates and neck/body directions
+        self.abs_coords = (None, None)
+        self.abs_neck_dir = None
+        self.abs_body_dir = None
 
         # create a new server parameter object for holding all server params
         self.server_parameters = ServerParameters()
 
-    def triangulate(self, flags, flag_dict, angle_step=30):
+    def triangulate_direction(self, flags, flag_dict):
+        """
+        Determines absolute view angle for the player given a list of visible
+        flags.  We find the absolute angle to each flag, then return the average
+        of those angles.  Returns 'None' if no angle could be determined.
+        """
+
+        # average all flag angles together and save that as absolute angle
+        abs_angles = []
+        for f in self.flags:
+            # if the flag has useful data, consider it
+            if f.distance is not None and f.flag_id in flag_dict:
+                flag_point = flag_dict[f.flag_id]
+                abs_dir = self.angle_between_points(self.abs_coords, flag_point)
+                abs_angles.append(abs_dir)
+
+        # return the average if available
+        if len(abs_angles) > 0:
+            return sum(abs_angles) / len(abs_angles)
+
+        return None
+
+    def triangulate_position(self, flags, flag_dict, angle_step=30):
         """
         Returns a best-guess position based on the triangulation via distances
         to all flags in the flag list given.  'angle_step' specifies the
@@ -247,6 +271,30 @@ class WorldModel:
 
         return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
+    def angle_between_points(self, point1, point2):
+        """
+        Returns the angle from the first point to the second, assuming that
+        these points exist on a plane, and that the positive x-axis is 0 degrees
+        and the positive y-axis is 90 degrees.  All returned angles are positive
+        and relative to the positive x-axis.
+        """
+
+        x1 = point1[0]
+        y1 = point1[1]
+        x2 = point2[0]
+        y2 = point2[1]
+
+        # get components of vector between the points
+        dx = x2 - x1
+        dy = y2 - y1
+
+        # return the angle in degrees
+        a = math.degrees(math.atan2(dy, dx))
+        if a < 0:
+            a = 360 + a
+
+        return a
+
     def process_new_info(self):
         """
         Update any internal variables based on the currently available
@@ -254,9 +302,20 @@ class WorldModel:
         server-reported messages, such as player coordinates.
         """
 
+        # TODO: make all triangulate_* calculations more accurate
+
         # update the apparent coordinates of the player based on all flag pairs
-        flag_coords = game_object.Flag.FLAG_COORDS
-        self.coordinates = self.triangulate(self.flags, flag_coords)
+        flag_dict = game_object.Flag.FLAG_COORDS
+        self.abs_coords = self.triangulate_position(self.flags, flag_dict)
+
+        # set the neck and body absolute directions based on flag directions
+        self.abs_neck_dir = self.triangulate_direction(self.flags, flag_dict)
+
+        # set body dir only if we got a neck dir, else reset it
+        if self.abs_neck_dir is not None and self.neck_direction is not None:
+            self.abs_body_dir = self.abs_neck_dir - self.neck_direction
+        else:
+            self.abs_body_dir = None
 
     def is_before_kick_off(self):
         """
