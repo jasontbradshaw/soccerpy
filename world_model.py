@@ -1,3 +1,6 @@
+import math
+import random
+
 import message_parser
 import sp_exceptions
 import game_object
@@ -122,6 +125,129 @@ class WorldModel:
         # create a new server parameter object for holding all server params
         self.server_parameters = ServerParameters()
 
+    def triangulate(self, flags, flag_dict, angle_step=30):
+        """
+        Returns a best-guess position based on the triangulation via distances
+        to all flags in the flag list given.
+        """
+
+        points = []
+        for f in flags:
+            # skip flags without distance information, a specific id, or the
+            # goal post flags.
+            # TODO: fix goal post flag coords!
+            if (f.distance is None or f.flag_id not in flag_dict or
+                    flag_dict[f.flag_id][1] is None):
+                continue
+
+            # generate points every 'angle_step' degrees around each flag,
+            # discarding those off-field.
+            for i in xrange(0, 360, angle_step):
+                dy = f.distance * math.sin(math.radians(i))
+                dx = f.distance * math.cos(math.radians(i))
+
+                fcoords = flag_dict[f.flag_id]
+                new_point = (fcoords[0] + dx, fcoords[1] + dy)
+
+                # skip points with a coordinate outside the play boundaries
+                if (new_point[0] > 60 or new_point[0] < -60 or
+                        new_point[1] < -40 or new_point[1] > 40):
+                    continue
+
+                # add point to list of all points
+                points.append(new_point)
+
+        # get the dict of clusters mapped to centers
+        clusters = self.cluster_points(points)
+
+        # return the center that has the most points as an approximation to our
+        # absolute position.
+        center_with_most_points = (0, 0)
+        max_points = 0
+        for c in clusters:
+            if len(clusters[c]) > max_points:
+                center_with_most_points = c
+                max_points = len(clusters[c])
+
+        return center_with_most_points
+
+    def cluster_points(self, points):
+        """
+        Cluster a set of points into a dict of centers mapped to point lists.
+        Uses the k-means clustering algorithm with random initial centers and a
+        fixed number of iterations to find clusters.
+        """
+
+        # generate initial random centers, ignoring identical ones
+        centers = set([])
+        for i in xrange(int(math.sqrt(len(points) / 2))):
+            # a random coordinate somewhere within the field boundaries
+            rand_center = (random.randint(-55, 55), random.randint(-35, 35))
+            centers.add(rand_center)
+
+        # we cluster until sets don't change after an iteration
+        latest = {}
+        cur = {}
+
+        # cluster for some iterations before returning result so far
+        for i in xrange(15):
+            # initialze cluster lists
+            for c in centers:
+                cur[c] = []
+
+            # check every point
+            for p in points:
+                # find nearest cluster center
+                nearest = None
+                nearest_d = 0
+                for c in centers:
+                    d = self.euclidean_distance(c, p)
+                    if d < nearest_d or nearest is None:
+                        nearest = c
+                        nearest_d = d
+
+                # add point to this center's cluster
+                cur[nearest].append(p)
+
+            # recompute centers
+            new_centers = set([])
+            for cluster in cur.values():
+                tot_x = 0
+                tot_y = 0
+
+                # remove empty clusters
+                if len(cluster) == 0:
+                    continue
+
+                # generate average center of cluster
+                for p in cluster:
+                    tot_x += p[0]
+                    tot_y += p[1]
+
+                # get average center and add to new centers set
+                ave_center = (tot_x / len(cluster), tot_y / len(cluster))
+                new_centers.add(ave_center)
+
+            # move on to next iteration
+            centers = new_centers
+            latest = cur
+            cur = {}
+
+        # return latest cluster iteration
+        return latest
+
+    def euclidean_distance(self, point1, point2):
+        """
+        Returns the Euclidean distance between two points on a plane.
+        """
+
+        x1 = point1[0]
+        y1 = point1[1]
+        x2 = point2[0]
+        y2 = point2[1]
+
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
     def process_new_info(self):
         """
         Update any internal variables based on the currently available
@@ -129,27 +255,9 @@ class WorldModel:
         server-reported messages, such as player coordinates.
         """
 
-        # a list of all calculated coordinate pairs that we'll turn into a
-        # single coordinate later.
-        guessed_coords = []
-
         # update the apparent coordinates of the player based on all flag pairs
         flag_coords = game_object.Flag.FLAG_COORDS
-        for i in xrange(len(self.flags)):
-            cur = self.flags[i]
-
-            # skip if flag isn't in dict
-            if cur not in flag_dict:
-                continue
-
-            for other in self.flags[i + 1:]:
-                # skip if flag isn't in dict
-                if other not in flag_coords):
-                    continue
-
-                # calculate coordinates
-
-
+        self.coordinates = self.triangulate(self.flags, flag_coords)
 
     def is_before_kick_off(self):
         """
