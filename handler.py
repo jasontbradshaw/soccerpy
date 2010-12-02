@@ -291,11 +291,14 @@ class MessageHandler:
             values = info[1:]
 
             if name == "view_mode":
-                self.wm.view_mode = tuple(values)
+                self.wm.view_quality = values[0]
+                self.wm.view_width = values[1]
             elif name == "stamina":
-                self.wm.stamina = tuple(values)
+                self.wm.stamina = values[0]
+                self.wm.effort = values[1]
             elif name == "speed":
-                self.wm.speed = tuple(values)
+                self.wm.speed_amount = values[0]
+                self.wm.speed_direction = values[1]
             elif name == "head_angle":
                 self.wm.neck_angle = values[0]
 
@@ -340,7 +343,21 @@ class MessageHandler:
         # each list is two items: a value name and its value.  we add them all
         # to the ServerParameters class inside WorldModel programmatically.
         for param in msg[1:]:
-            pass
+            # put all [param, value] pairs into the server settings object
+            # by setting the attribute programmatically.
+            if len(param) != 2:
+                continue
+            
+            # the parameter and its value
+            key = param[0]
+            value = param[1]
+
+            # set the attribute if it was accounted for, otherwise alert the user
+            if hasattr(self.wm.server_parameters, key):
+                setattr(self.wm.server_parameters, key, value)
+            else:
+                raise AttributeError("Couldn't find a matching parameter in "
+                        "ServerParameters class: '%s'" % key)
 
     def _handle_init(self, msg):
         """

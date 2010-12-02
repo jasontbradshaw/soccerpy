@@ -98,9 +98,12 @@ class WorldModel:
         self.play_mode = WorldModel.PlayModes.BEFORE_KICK_OFF
 
         # body state
-        self.view_mode = (None, None)
-        self.stamina = (None, None)
-        self.speed = (None, None)
+        self.view_width = None
+        self.view_quality = None
+        self.stamina = None
+        self.effort = None
+        self.speed_amount = None
+        self.speed_direction = None
         self.neck_angle = None
 
         # counts of actions taken so far
@@ -165,14 +168,16 @@ class WorldModel:
         Tells us whether the ball is in reach of the current player.
         """
 
-        # TODO: parse server settings
+        return (self.ball is not None and
+                self.ball.distance is not None and
+                self.ball.distance <= self.server_settings.kickable_margin)
 
     def get_ball_speed_max(self):
         """
         Returns the maximum speed the ball can be kicked at.
         """
 
-        # TODO: parse server settings
+        return self.server_settings.ball_speed_max
 
     def kick_to(self, position, speed):
         """
@@ -238,14 +243,14 @@ class WorldModel:
 
     def get_stamina(self):
         """
-        Returns the agent's current stamina.
+        Returns the agent's current stamina amount.
         """
 
-        # TODO: need body model inside world model
+        return self.stamina[0]
 
     def get_recovery(self):
         """
-        Returns something...
+        Returns something.
         """
 
         # TODO: need body model inside world model
@@ -255,7 +260,7 @@ class WorldModel:
         Returns the maximum amount of stamina a player can have.
         """
 
-        # TODO: parse server settings
+        return self.server_settings.stamina_max
 
     def turn_body_to_object(self, obj):
         """
