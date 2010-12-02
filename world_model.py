@@ -83,6 +83,9 @@ class WorldModel:
         self.players = []
         self.lines = []
 
+        # the default position of this player, its home position
+        self.home_point = (None, None)
+
         # scores for each side
         self.score_l = 0
         self.score_r = 0
@@ -444,13 +447,6 @@ class WorldModel:
         # ...and then return it
         return 1 - a - b
 
-    def intercept(self, should_intercept):
-        """
-        Intercept the ball at its calculated end position.
-        """
-
-        # TODO: model ball movement and trajectory
-
     def turn_neck_to_object(self, obj):
         """
         Turns the player's neck to a given object.
@@ -458,15 +454,7 @@ class WorldModel:
 
         self.ah.turn_neck(obj.direction)
 
-    def get_strategic_position(self):
-        """
-        Returns a good position for the player to be in relative to its starting
-        position and other variables.
-        """
-
-        # TODO: do we even want to do this?
-
-    def get_distance_to(self, point):
+    def get_distance_to_point(self, point):
         """
         Returns the linear distance to some point on the field from the current
         point.
@@ -488,6 +476,24 @@ class WorldModel:
         # turn to that angle
         self.ah.turn(relative_dir)
 
+    def get_object_absolute_coords(self, obj):
+        """
+        Determines the absolute coordinates of the given object based on the
+        agent's current position.  Returns None if the coordinates can't be
+        calculated.
+        """
+
+        # we can't calculate this without a distance to the object
+        if obj.distance is None:
+            return None
+
+        # get the components of the vector to the object
+        dx = obj.distance * math.cos(obj.direction)
+        dy = obj.distance * math.sin(obj.direction)
+
+        # return the point the object is at relative to our current position
+        return (self.abs_coords[0] + dx, self.abs_coords[1] + dy)
+
     def teleport_to_point(self, point):
         """
         Teleports the player to a given (x, y) point using the 'move' command.
@@ -504,19 +510,26 @@ class WorldModel:
         # neck angle is relative to body, so we turn it back the inverse way
         self.ah.turn_neck(self.neck_direction * -1)
 
-    def get_fastest_teammate_to_point(self, point):
+    def get_nearest_teammate_to_point(self, point):
         """
         Returns the uniform number of the fastest teammate to some point.
         """
 
-        # TODO: need movement model
+        # holds tuples of (player dist to point, player)
+        distances = []
+        for p in self.players:
+            # skip enemy and unknwon players
+            if p.side != self.side:
+                continue
 
-    def get_recovery(self):
-        """
-        Returns something.
-        """
+            # find their absolute position
+            p_coords = self.get_object_absolute_coords(p)
 
-        # TODO: what is this exactly?
+            distances.append((self.euclidean_distance(point, p_coords), p))
+
+        # return the nearest known teammate to the given point
+        nearest = min(distances)[1]
+        return nearest
 
     def get_stamina(self):
         """
