@@ -37,6 +37,84 @@ class Flag(GameObject):
     A flag on the field.  Can be used by the agent to determine its position.
     """
 
+    # a dictionary mapping all flag_ids to their on-field (x, y) coordinates
+    # TODO: these are educated guesses based on Figure 4.2 in the documentation.
+    #       where would one find the actual coordinates, besides in the server
+    #       code?
+    FLAG_COORDS = {
+            # perimiter flags
+            "tl50": (-50, 40),
+            "tl40": (-40, 40),
+            "tl30": (-30, 40),
+            "tl20": (-20, 40),
+            "tl10": (-10, 40),
+            "t0": (0, 40),
+            "tr10": (10, 40),
+            "tr20": (20, 40),
+            "tr30": (30, 40),
+            "tr40": (40, 40),
+            "tr50": (50, 40),
+
+            "rt30": (60, 30),
+            "rt20": (60, 20),
+            "rt10": (60, 10),
+            "r0": (60, 0),
+            "rb10": (60, -10),
+            "rb20": (60, -20),
+            "rb30": (60, -30),
+
+            "bl50": (-50, -40),
+            "bl40": (-40, -40),
+            "bl30": (-30, -40),
+            "bl20": (-20, -40),
+            "bl10": (-10, -40),
+            "b0": (0, -40),
+            "br10": (10, -40),
+            "br20": (20, -40),
+            "br30": (30, -40),
+            "br40": (40, -40),
+            "br50": (50, -40),
+
+            "lt30": (-60, 30),
+            "lt20": (-60, 20),
+            "lt10": (-60, 10),
+            "l0": (-60, 0),
+            "lb10": (-60, -10),
+            "lb20": (-60, -20),
+            "lb30": (-60, -30),
+
+            # goal flags ('t' and 'b' flags can change based on server parameter
+            # 'goal_width' and are left unspecified).
+            "glt": (-55, None),
+            "gl": (-55, 0),
+            "glb": (-55, None),
+
+            "grt": (55, None),
+            "gr": (55, 0),
+            "grb": (55, None),
+
+            # penalty flags
+            "plt": (-35, 20),
+            "plc": (-35, 0),
+            "plb": (-32, -20),
+
+            "prt": (35, 20),
+            "prc": (35, 0),
+            "prb": (32, -20),
+
+            # field boundary flags (on boundary lines)
+            "lt": (-55, 35),
+            "ct": (0, 35),
+            "rt": (55, 35),
+
+            "lb": (-55, -35),
+            "cb": (0, -35),
+            "rb": (55, -35),
+
+            # center flag
+            "c": (0, 0)
+        }
+
     def __init__(self, distance, direction, flag_id):
         """
         Adds a flag id for this field object.  Every flag has a unique id.
