@@ -7,7 +7,7 @@ import random
 import sock
 import sp_exceptions
 import handler
-from model import WorldModel, BodyModel
+from world_model import WorldModel
 
 class Agent:
     def __init__(self):
@@ -22,14 +22,13 @@ class Agent:
 
         # models and the message handler for parsing and storing information
         self.wm = None
-        self.bm = None
         self.msg_handler = None
 
         # parse thread and control variable
         self.__parsing = False
         self.__msg_thread = None
 
-        self.__thinking = FalseO# think thread and control variable
+        self.__thinking = False # think thread and control variable
         self.__think_thread = None
 
         # whether we should run the think method
@@ -56,13 +55,12 @@ class Agent:
 
         # our models of the world and our body
         self.wm = WorldModel(handler.ActionHandler(self.__sock))
-        self.bm = BodyModel()
 
         # set the team name of the world model to the given name
         self.wm.teamname = teamname
 
         # handles all messages received from the server
-        self.msg_handler = handler.MessageHandler(self.wm, self.bm)
+        self.msg_handler = handler.MessageHandler(self.wm)
 
         # set up our threaded message receiving system
         self.__parsing = True # tell thread that we're currently running

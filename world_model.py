@@ -97,107 +97,7 @@ class WorldModel:
         # the mode the game is currently in (default to not playing yet)
         self.play_mode = WorldModel.PlayModes.BEFORE_KICK_OFF
 
-    def is_before_kick_off(self):
-        """
-        Tells us whether the game is in a pre-kickoff state.
-        """
-
-        return self.play_mode == WorldModel.PlayModes.BEFORE_KICK_OFF
-
-    def is_kick_off_us(self):
-        """
-        Tells us whether it's our turn to kick off.
-        """
-
-    def is_dead_ball_them(self):
-        """
-        Returns whether the ball is currently dead by the other team's fault.
-        """
-
-    def is_ball_kickable(self):
-        """
-        Tells us whether the ball is in reach and able to be kicked.
-        """
-
-    def get_ball_speed_max(self):
-        """
-        Returns the maximum speed the ball can be kicked at.
-        """
-
-    def kick_to(self, position, speed):
-        """
-        Kick the ball to some position with some speed.
-        """
-
-    def intercept(self, should_intercept):
-        """
-        TODO: what does this do?
-        """
-
-    def turn_neck_to_object(self, obj):
-        """
-        Turns the player's neck to a given object.
-        """
-
-    def get_strategic_position(self):
-        """
-        Returns a good position for the player to be in relative to its starting
-        position and other variables.
-        """
-
-    def get_distance_to(self, point):
-        """
-        Returns the linear distance to some point on the field from the current
-        point.
-        """
-
-    def turn_body_to_point(self, point):
-        """
-        Turns the agent's body to face a given point on the field.
-        """
-
-    def teleport_to_pos(self, point):
-        """
-        Teleports the player to a given point using the 'move' command.
-        """
-
-    def align_neck_with_body(self):
-        """
-        Turns the player's neck to be in line with its body, making the angle
-        between the two 0 degrees.
-        """
-
-    def get_fastest_teammate_to_point(self, point):
-        """
-        Returns the uniform number of the fastest teammate to some point.
-        """
-
-    def get_stamina(self):
-        """
-        Returns the agent's current stamina.
-        """
-
-    def get_recovery(self):
-        """
-        Returns something...
-        """
-
-    def get_stamina_max(self):
-        """
-        Returns the maximum amount of stamina a player can have.
-        """
-
-    def turn_body_to_object(self, obj):
-        """
-        Turns the player's body to face a particular object.
-        """
-
-class BodyModel:
-    """
-    Represents the agent's view of its own body.
-    """
-
-    def __init__(self):
+        # body state
         self.view_mode = (None, None)
         self.stamina = (None, None)
         self.speed = (None, None)
@@ -212,4 +112,153 @@ class BodyModel:
         self.catch_count = None
         self.move_count = None
         self.change_view_count = None
+
+
+    def is_before_kick_off(self):
+        """
+        Tells us whether the game is in a pre-kickoff state.
+        """
+
+        return self.play_mode == WorldModel.PlayModes.BEFORE_KICK_OFF
+
+    def is_kick_off_us(self):
+        """
+        Tells us whether it's our turn to kick off.
+        """
+
+        ko_left = WorldModel.PlayModes.KICK_OFF_L
+        ko_right = WorldModel.PlayModes.KICK_OFF_R
+
+        # return whether we're on the side that's kicking off
+        return (self.side == WorldModel.SIDE_L and self.play_mode == ko_left or
+                self.side == WorldModel.SIDE_R and self.play_mode == ko_right)
+
+    def is_dead_ball_them(self):
+        """
+        Returns whether the ball is in the other team's posession and it's a
+        free kick, corner kick, or kick in.
+        """
+
+        # shorthand for verbose constants
+        kil = WorldModel.PlayModes.KICK_IN_L
+        kir = WorldModel.PlayModes.KICK_IN_R
+        fkl = WorldModel.PlayModes.FREE_KICK_L
+        fkr = WorldModel.PlayModes.FREE_KICK_R
+        ckl = WorldModel.PlayModes.CORNER_KICK_L
+        ckr = WorldModel.PlayModes.CORNER_KICK_R
+
+        # shorthand for whether left team or right team is free to act
+        pm = self.play_mode
+        free_left = (pm == kil or pm == fkl or pm == ckl)
+        free_right = (pm == kir or pm == fkr or pm == ckr)
+
+        # return whether the opposing side is in a dead ball situation
+        if self.side == WorldModel.SIDE_L:
+            return free_right
+        else:
+            return free_left
+
+    def is_ball_kickable(self):
+        """
+        Tells us whether the ball is in reach of the current player.
+        """
+
+        # TODO: parse server settings
+
+    def get_ball_speed_max(self):
+        """
+        Returns the maximum speed the ball can be kicked at.
+        """
+
+        # TODO: parse server settings
+
+    def kick_to(self, position, speed):
+        """
+        Kick the ball to some position with some speed.
+        """
+
+        # TODO: predict angle and model speed at end
+
+    def intercept(self, should_intercept):
+        """
+        TODO: what does this do?
+        """
+
+        # TODO: model ball movement and trajectory
+
+    def turn_neck_to_object(self, obj):
+        """
+        Turns the player's neck to a given object.
+        """
+
+        self.ah.turn_neck(obj.direction)
+
+    def get_strategic_position(self):
+        """
+        Returns a good position for the player to be in relative to its starting
+        position and other variables.
+        """
+
+    def get_distance_to(self, point):
+        """
+        Returns the linear distance to some point on the field from the current
+        point.
+        """
+
+        # TODO: need player coordinates to do this
+
+    def turn_body_to_point(self, point):
+        """
+        Turns the agent's body to face a given point on the field.
+        """
+
+        # TODO: need player coordinates to do this
+
+    def teleport_to_pos(self, point):
+        """
+        Teleports the player to a given (x, y) point using the 'move' command.
+        """
+
+        self.ah.move(point[0], point[1])
+
+    def align_neck_with_body(self):
+        """
+        Turns the player's neck to be in line with its body, making the angle
+        between the two 0 degrees.
+        """
+
+        # TODO: need body model inside world model
+
+    def get_fastest_teammate_to_point(self, point):
+        """
+        Returns the uniform number of the fastest teammate to some point.
+        """
+
+    def get_stamina(self):
+        """
+        Returns the agent's current stamina.
+        """
+
+        # TODO: need body model inside world model
+
+    def get_recovery(self):
+        """
+        Returns something...
+        """
+
+        # TODO: need body model inside world model
+
+    def get_stamina_max(self):
+        """
+        Returns the maximum amount of stamina a player can have.
+        """
+
+        # TODO: parse server settings
+
+    def turn_body_to_object(self, obj):
+        """
+        Turns the player's body to face a particular object.
+        """
+
+        self.ah.turn(obj.direction)
 

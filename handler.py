@@ -4,7 +4,7 @@ import Queue as queue
 import message_parser
 import sp_exceptions
 import game_object
-import model
+from world_model import WorldModel
 
 # should we print messages received from the server?
 PRINT_SERVER_MESSAGES = False
@@ -25,9 +25,8 @@ class MessageHandler:
     # an inner class used for creating named tuple 'hear' messages
     Message = collections.namedtuple("Message", "time sender message")
 
-    def __init__(self, world_model, body_model):
+    def __init__(self, world_model):
         self.wm = world_model
-        self.bm = body_model
 
     def handle_message(self, msg):
         """
@@ -152,10 +151,10 @@ class MessageHandler:
                         side = self.wm.side
                     # otherwise, set side to the other team's side
                     else:
-                        if self.wm.side == model.WorldModel.SIDE_L:
-                            side = model.WorldModel.SIDE_R
+                        if self.wm.side == WorldModel.SIDE_L:
+                            side = WorldModel.SIDE_R
                         else:
-                            side = model.WorldModel.SIDE_L
+                            side = WorldModel.SIDE_L
 
                 # calculate player's speed
                 speed = None
@@ -241,23 +240,23 @@ class MessageHandler:
 
             # keep track of scores by setting them to the value reported.  this
             # precludes any possibility of getting out of sync with the server.
-            if mode.startswith(model.WorldModel.RefereeMessages.GOAL_L):
+            if mode.startswith(WorldModel.RefereeMessages.GOAL_L):
                 # split off the number, the part after the rightmost '_'
                 self.wm.score_l = int(mode.rsplit("_", 1)[1])
                 return
-            elif mode.startswith(model.WorldModel.RefereeMessages.GOAL_R):
+            elif mode.startswith(WorldModel.RefereeMessages.GOAL_R):
                 self.wm.score_r = int(mode.rsplit("_", 1)[1])
                 return
 
             # ignore these messages, but pass them on to the agent. these don't
             # change state but could still be useful.
-            elif (mode == model.WorldModel.RefereeMessages.FOUL_L or
-                  mode == model.WorldModel.RefereeMessages.FOUL_R or
-                  mode == model.WorldModel.RefereeMessages.GOALIE_CATCH_BALL_L or
-                  mode == model.WorldModel.RefereeMessages.GOALIE_CATCH_BALL_R or
-                  mode == model.WorldModel.RefereeMessages.TIME_UP_WITHOUT_A_TEAM or
-                  mode == model.WorldModel.RefereeMessages.HALF_TIME or
-                  mode == model.WorldModel.RefereeMessages.TIME_EXTENDED):
+            elif (mode == WorldModel.RefereeMessages.FOUL_L or
+                  mode == WorldModel.RefereeMessages.FOUL_R or
+                  mode == WorldModel.RefereeMessages.GOALIE_CATCH_BALL_L or
+                  mode == WorldModel.RefereeMessages.GOALIE_CATCH_BALL_R or
+                  mode == WorldModel.RefereeMessages.TIME_UP_WITHOUT_A_TEAM or
+                  mode == WorldModel.RefereeMessages.HALF_TIME or
+                  mode == WorldModel.RefereeMessages.TIME_EXTENDED):
 
                 # messages are named 3-tuples of (time, sender, message)
                 ref_msg = self.Message(time_recvd, sender, message)
@@ -292,31 +291,31 @@ class MessageHandler:
             values = info[1:]
 
             if name == "view_mode":
-                self.bm.view_mode = tuple(values)
+                self.wm.view_mode = tuple(values)
             elif name == "stamina":
-                self.bm.stamina = tuple(values)
+                self.wm.stamina = tuple(values)
             elif name == "speed":
-                self.bm.speed = tuple(values)
+                self.wm.speed = tuple(values)
             elif name == "head_angle":
-                self.bm.neck_angle = values[0]
+                self.wm.neck_angle = values[0]
 
             # these update the counts of the basic actions taken
             elif name == "kick":
-                self.bm.kick_count = values[0]
+                self.wm.kick_count = values[0]
             elif name == "dash":
-                self.bm.dash_count = values[0]
+                self.wm.dash_count = values[0]
             elif name == "turn":
-                self.bm.turn_count = values[0]
+                self.wm.turn_count = values[0]
             elif name == "say":
-                self.bm.say_count = values[0]
+                self.wm.say_count = values[0]
             elif name == "turn_neck":
-                self.bm.turn_neck_count = values[0]
+                self.wm.turn_neck_count = values[0]
             elif name == "catch":
-                self.bm.catch_count = values[0]
+                self.wm.catch_count = values[0]
             elif name == "move":
-                self.bm.move_count = values[0]
+                self.wm.move_count = values[0]
             elif name == "change_view":
-                self.bm.change_view_count = values[0]
+                self.wm.change_view_count = values[0]
 
             # we leave unknown values out of the equation
             else:
