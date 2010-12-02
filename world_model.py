@@ -128,7 +128,9 @@ class WorldModel:
     def triangulate(self, flags, flag_dict, angle_step=30):
         """
         Returns a best-guess position based on the triangulation via distances
-        to all flags in the flag list given.
+        to all flags in the flag list given.  'angle_step' specifies the
+        increments between angles for projecting points onto the circle
+        surrounding a flag.
         """
 
         points = []
@@ -168,7 +170,7 @@ class WorldModel:
 
         return center_with_most_points
 
-    def cluster_points(self, points):
+    def cluster_points(self, points, num_cluster_iterations=15):
         """
         Cluster a set of points into a dict of centers mapped to point lists.
         Uses the k-means clustering algorithm with random initial centers and a
@@ -187,7 +189,7 @@ class WorldModel:
         cur = {}
 
         # cluster for some iterations before returning result so far
-        for i in xrange(15):
+        for i in xrange(num_cluster_iterations):
             # initialze cluster lists
             for c in centers:
                 cur[c] = []
