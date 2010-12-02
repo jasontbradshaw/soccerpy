@@ -286,7 +286,7 @@ class Agent:
                                 -7 <= self.wm.ball.direction <= 7):
                             self.wm.ah.dash(50)
                         else:
-                            self.wm.ah.turn_body_to_point((0, 0))
+                            self.wm.turn_body_to_point((0, 0))
 
                 # turn to ball if we can see it, else face the enemy goal
                 if self.wm.ball is not None:

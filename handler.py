@@ -322,6 +322,10 @@ class MessageHandler:
             else:
                 pass
 
+    def _handle_change_player_type(self, msg):
+        """
+        Handle player change messages.
+        """
 
     def _handle_player_param(self, msg):
         """

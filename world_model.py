@@ -401,7 +401,8 @@ class WorldModel:
 
         # get relative direction to point from body, since kicks are relative to
         # body direction.
-        rel_point_dir = self.abs_body_dir - abs_point_dir
+        if self.abs_body_dir is not None:
+            rel_point_dir = self.abs_body_dir - abs_point_dir
 
         # we do a simple linear interpolation to calculate final kick speed,
         # assuming a kick of power 100 goes 45 units in the given direction.
