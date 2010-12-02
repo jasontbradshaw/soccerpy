@@ -43,8 +43,7 @@ class MessageHandler:
 
         # this is the name of the function that should be used to handle
         # this message type.  we pull it from this object dynamically to
-        # avoid having a huge if/elif/.../else statement. this should be both
-        # faster and more flexible (dict lookup is really fast in python).
+        # avoid having a huge if/elif/.../else statement.
         msg_func = "_handle_%s" % parsed[0]
 
         if hasattr(self, msg_func):
@@ -212,16 +211,10 @@ class MessageHandler:
             else:
                 raise ObjectTypeError("Unknown object: '" + str(obj) + "'")
 
-        # change the data in the world model to the newly parsed data
-        self.wm.ball = new_ball
-        self.wm.flags = new_flags
-        self.wm.goals = new_goals
-        self.wm.players = new_players
-        self.wm.lines = new_lines
-
         # tell the WorldModel to update any internal variables based on the
         # newly gleaned information.
-        self.wm.process_new_info()
+        self.wm.process_new_info(new_ball, new_flags, new_goals, new_players,
+                new_lines)
 
     def _handle_hear(self, msg):
         """

@@ -78,8 +78,8 @@ class WorldModel:
 
         # these variables store all objects for any particular game step
         self.ball = None
-        self.goals = []
         self.flags = []
+        self.goals = []
         self.players = []
         self.lines = []
 
@@ -291,12 +291,19 @@ class WorldModel:
 
         return a
 
-    def process_new_info(self):
+    def process_new_info(self, ball, flags, goals, players, lines):
         """
         Update any internal variables based on the currently available
-        information.  This calculates information not available directly from
-        server-reported messages, such as player coordinates.
+        information.  This also calculates information not available directly
+        from server-reported messages, such as player coordinates.
         """
+
+        # update basic information
+        self.ball = ball
+        self.flags = flags
+        self.goals = goals
+        self.players = players
+        self.lines = lines
 
         # TODO: make all triangulate_* calculations more accurate
 
@@ -409,16 +416,23 @@ class WorldModel:
         point.
         """
 
-        # TODO: need player coordinates to do this
+        return self.euclidean_distance(self.abs_coords, point)
 
     def turn_body_to_point(self, point):
         """
         Turns the agent's body to face a given point on the field.
         """
 
-        # TODO: need player coordinates to do this
+        # calculate absolute direction to point
+        abs_point_dir = self.angle_between_points(self.abs_coords, point)
 
-    def teleport_to_pos(self, point):
+        # subtract from absolute body direction to get relative angle
+        relative_dir = self.abs_body_dir - abs_point_dir
+
+        # turn to that angle
+        self.ah.turn(relative_dir)
+
+    def teleport_to_point(self, point):
         """
         Teleports the player to a given (x, y) point using the 'move' command.
         """
@@ -441,19 +455,19 @@ class WorldModel:
 
         # TODO: need movement model
 
-    def get_stamina(self):
-        """
-        Returns the agent's current stamina amount.
-        """
-
-        return self.stamina
-
     def get_recovery(self):
         """
         Returns something.
         """
 
         # TODO: what is this exactly?
+
+    def get_stamina(self):
+        """
+        Returns the agent's current stamina amount.
+        """
+
+        return self.stamina
 
     def get_stamina_max(self):
         """
