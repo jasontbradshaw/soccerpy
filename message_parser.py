@@ -13,10 +13,9 @@ def parse(text):
     with than the raw (often poorly formatted) text.
     
     This parses generally, taking any lisp-like string and turning it into a
-    list of nested lists, where each nesting (besides the outermost) indicates
-    a parenthesized expression.  The outermost list is simply a container for
-    holding multiple top-level parenthesized expressions. Ex: "(foo 1) (bar 2)"
-    becomes [['foo', '1'], ['bar', '2']].
+    list of nested lists, where each nesting indicates a parenthesized
+    expression.  holding multiple top-level parenthesized expressions. Ex: "(baz
+    0 (foo 1.5))" becomes ['baz', 0, ['foo', 1.5]].
     """
     
     # make sure all of our parenthesis match
@@ -27,6 +26,7 @@ def parse(text):
     # result will only ever contain one item, the first level of indenting
     # encountered.  this is because the server (hopefully!) only ever sends one
     # message at a time.
+    # TODO: make sure that the server only ever sends one message at a time!
     result = []
     
     # the current level of indentation, used to append chars to correct level
